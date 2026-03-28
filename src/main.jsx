@@ -6,8 +6,11 @@ import { BrowserRouter } from "react-router-dom";
 import App from "./App";
 import "./index.css";
 
-const convexUrl =
-  import.meta.env.VITE_CONVEX_URL ?? "https://elegant-lark-641.convex.cloud";
+const convexUrl = import.meta.env.VITE_CONVEX_URL;
+
+if (!convexUrl) {
+  throw new Error("Missing VITE_CONVEX_URL. Configure it in your environment.");
+}
 
 const convex = new ConvexReactClient(convexUrl);
 
