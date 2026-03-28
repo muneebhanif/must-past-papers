@@ -230,3 +230,42 @@ export const toggleLike = mutation({
     return { liked: true };
   },
 });
+
+export const rightRailData = query({
+  args: {},
+  handler: async (ctx) => {
+    const papers = await ctx.db.query("papers").collect();
+
+    const approvedPapers = papers.filter((paper) => paper.status === "approved");
+    const contributorCounts = new Map();
+
+    for (const paper of approvedPapers) {
+      const previous = contributorCounts.get(paper.uploadedBy) ?? 0;
+      contributorCounts.set(paper.uploadedBy, previous + 1);
+    }
+
+    const ranked = [...contributorCounts.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5);
+
+    const topContributors = await Promise.all(
+      ranked.map(async ([userId, approvedCount]) => {
+        const user = await ctx.db.get(userId);
+        return {
+          userId,
+          name: user?.name ?? "Unknown",
+          image: user?.image ?? "",
+          approvedCount,
+        };
+      }),
+    );
+
+    return {
+      topContributors,
+      stats: {
+        totalApproved: approvedPapers.length,
+        totalUploads: papers.length,
+      },
+    };
+  },
+});
