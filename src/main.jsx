@@ -6,7 +6,10 @@ import { BrowserRouter } from "react-router-dom";
 import App from "./App";
 import "./index.css";
 
-const convex = new ConvexReactClient(import.meta.env.VITE_CONVEX_URL);
+const convexUrl =
+  import.meta.env.VITE_CONVEX_URL ?? "https://elegant-lark-641.convex.cloud";
+
+const convex = new ConvexReactClient(convexUrl);
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
