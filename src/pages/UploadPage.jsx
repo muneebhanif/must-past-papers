@@ -58,14 +58,22 @@ export function UploadPage({ onRequireAuth }) {
       body.append("expire", String(auth.expire));
       body.append("token", auth.token);
       body.append("folder", auth.folder);
-      body.append("checks", auth.checks);
       body.append("useUniqueFileName", "true");
 
       const uploadResponse = await fetch("https://upload.imagekit.io/api/v1/files/upload", {
         method: "POST",
         body,
       });
-      if (!uploadResponse.ok) throw new Error("Image upload failed.");
+      if (!uploadResponse.ok) {
+        let detail = "Image upload failed.";
+        try {
+          const failure = await uploadResponse.json();
+          detail = failure?.message || detail;
+        } catch {
+          // ignore non-JSON response
+        }
+        throw new Error(detail);
+      }
       const uploadResult = await uploadResponse.json();
 
       await createPaper({ ...form, imageUrl: uploadResult.url });

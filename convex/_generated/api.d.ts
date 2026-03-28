@@ -14,6 +14,7 @@ import type * as http from "../http.js";
 import type * as imagekit from "../imagekit.js";
 import type * as lib from "../lib.js";
 import type * as papers from "../papers.js";
+import type * as uploadAuthLogs from "../uploadAuthLogs.js";
 import type * as users from "../users.js";
 
 import type {
@@ -29,6 +30,7 @@ declare const fullApi: ApiFromModules<{
   imagekit: typeof imagekit;
   lib: typeof lib;
   papers: typeof papers;
+  uploadAuthLogs: typeof uploadAuthLogs;
   users: typeof users;
 }>;
 
