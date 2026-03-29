@@ -40,6 +40,9 @@ export default defineSchema({
       v.literal("approved"),
       v.literal("rejected"),
     ),
+    reviewNote: v.optional(v.string()),
+    reviewedAt: v.optional(v.number()),
+    reviewedBy: v.optional(v.string()),
     createdAt: v.number(),
   })
     .index("by_status_createdAt", ["status", "createdAt"])
@@ -51,7 +54,9 @@ export default defineSchema({
     userId: v.id("users"),
     content: v.string(),
     createdAt: v.number(),
-  }).index("by_paperId_createdAt", ["paperId", "createdAt"]),
+  })
+    .index("by_paperId_createdAt", ["paperId", "createdAt"])
+    .index("by_userId_createdAt", ["userId", "createdAt"]),
 
   likes: defineTable({
     paperId: v.id("papers"),
@@ -59,7 +64,8 @@ export default defineSchema({
     createdAt: v.number(),
   })
     .index("by_paperId", ["paperId", "createdAt"])
-    .index("by_paperId_userId", ["paperId", "userId"]),
+    .index("by_paperId_userId", ["paperId", "userId"])
+    .index("by_userId_createdAt", ["userId", "createdAt"]),
 
   uploadAuthLogs: defineTable({
     userId: v.id("users"),

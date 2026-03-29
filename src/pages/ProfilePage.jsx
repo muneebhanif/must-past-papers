@@ -114,6 +114,11 @@ export function ProfilePage() {
                   {paper.status}
                 </span>
               </div>
+              {paper.status === "rejected" && paper.reviewNote ? (
+                <p className="mt-2 rounded-lg bg-red-50 px-3 py-2 text-xs font-semibold text-red-700">
+                  Rejection note: {paper.reviewNote}
+                </p>
+              ) : null}
             </article>
           ))}
           {!uploads.length ? <p className="text-sm text-slate-500">No uploads yet.</p> : null}

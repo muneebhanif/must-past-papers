@@ -148,6 +148,9 @@ export const create = mutation({
       imageUrl: sanitize(args.imageUrl, 600),
       uploadedBy: user._id,
       status: "pending",
+      reviewNote: undefined,
+      reviewedAt: undefined,
+      reviewedBy: undefined,
       createdAt: now,
     });
   },
@@ -187,17 +190,23 @@ export const setStatus = mutation({
   args: {
     paperId: v.id("papers"),
     status: v.union(v.literal("approved"), v.literal("rejected")),
+    reviewNote: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    await requireAdmin(ctx);
+    const admin = await requireAdmin(ctx);
 
     const paper = await ctx.db.get(args.paperId);
     if (!paper) {
       throw new ConvexError("Paper not found.");
     }
 
+    const note = (args.reviewNote ?? "").trim().slice(0, 500);
+
     await ctx.db.patch(args.paperId, {
       status: args.status,
+      reviewNote: args.status === "rejected" ? note : undefined,
+      reviewedAt: Date.now(),
+      reviewedBy: admin.email ?? admin.username ?? "admin",
     });
   },
 });
