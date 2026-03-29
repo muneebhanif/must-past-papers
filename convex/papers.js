@@ -45,16 +45,6 @@ const validatePaperArgs = (args) => {
 const enrichPaper = async (ctx, paper, viewerId) => {
   const uploader = await ctx.db.get(paper.uploadedBy);
 
-  const likes = await ctx.db
-    .query("likes")
-    .withIndex("by_paperId", (q) => q.eq("paperId", paper._id))
-    .collect();
-
-  const comments = await ctx.db
-    .query("comments")
-    .withIndex("by_paperId_createdAt", (q) => q.eq("paperId", paper._id))
-    .collect();
-
   const viewerLike = viewerId
     ? await ctx.db
         .query("likes")
@@ -73,8 +63,8 @@ const enrichPaper = async (ctx, paper, viewerId) => {
       image: uploader?.image ?? "",
     },
     stats: {
-      likeCount: likes.length,
-      commentCount: comments.length,
+      likeCount: paper.likeCount ?? 0,
+      commentCount: paper.commentCount ?? 0,
       likedByMe: Boolean(viewerLike),
     },
   };
@@ -105,11 +95,28 @@ export const listApproved = query({
     }
 
     let q;
-    if (args.department && args.department !== "All") {
+    if (args.department && args.department !== "All" && selectedType && selectedType !== "All") {
+      q = ctx.db
+        .query("papers")
+        .withIndex("by_department_status_type_createdAt", (index) =>
+          index
+            .eq("department", args.department)
+            .eq("status", "approved")
+            .eq("type", selectedType),
+        )
+        .order("desc");
+    } else if (args.department && args.department !== "All") {
       q = ctx.db
         .query("papers")
         .withIndex("by_department_status_createdAt", (index) =>
           index.eq("department", args.department).eq("status", "approved"),
+        )
+        .order("desc");
+    } else if (selectedType && selectedType !== "All") {
+      q = ctx.db
+        .query("papers")
+        .withIndex("by_status_type_createdAt", (index) =>
+          index.eq("status", "approved").eq("type", selectedType),
         )
         .order("desc");
     } else {
@@ -122,7 +129,6 @@ export const listApproved = query({
     const page = await q.paginate(args.paginationOpts);
 
     const filtered = page.page.filter((paper) => {
-      if (selectedType && selectedType !== "All" && paper.type !== selectedType) return false;
       if (!searchText) return true;
       const haystack = [paper.title, paper.subject, paper.teacher, paper.year, paper.type]
         .join(" ")
@@ -225,6 +231,8 @@ export const create = mutation({
       reviewNote: undefined,
       reviewedAt: undefined,
       reviewedBy: undefined,
+      likeCount: 0,
+      commentCount: 0,
       createdAt: now,
     });
   },
@@ -364,6 +372,10 @@ export const toggleLike = mutation({
   },
   handler: async (ctx, args) => {
     const user = await requireUser(ctx);
+    const paper = await ctx.db.get(args.paperId);
+    if (!paper) {
+      throw new ConvexError("Paper not found.");
+    }
 
     const existing = await ctx.db
       .query("likes")
@@ -374,6 +386,9 @@ export const toggleLike = mutation({
 
     if (existing) {
       await ctx.db.delete(existing._id);
+      await ctx.db.patch(args.paperId, {
+        likeCount: Math.max((paper.likeCount ?? 0) - 1, 0),
+      });
       return { liked: false };
     }
 
@@ -381,6 +396,9 @@ export const toggleLike = mutation({
       paperId: args.paperId,
       userId: user._id,
       createdAt: Date.now(),
+    });
+    await ctx.db.patch(args.paperId, {
+      likeCount: (paper.likeCount ?? 0) + 1,
     });
 
     return { liked: true };
@@ -390,7 +408,7 @@ export const toggleLike = mutation({
 export const rightRailData = query({
   args: {},
   handler: async (ctx) => {
-    const papers = await ctx.db.query("papers").collect();
+    const papers = await ctx.db.query("papers").order("desc").take(3000);
 
     const approvedPapers = papers.filter((paper) => paper.status === "approved");
     const contributorCounts = new Map();

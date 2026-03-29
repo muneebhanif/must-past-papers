@@ -43,16 +43,6 @@ const ensureUniqueUsername = async (ctx, username, ignoreUserId) => {
 const enrichPaper = async (ctx, paper) => {
   const uploader = await ctx.db.get(paper.uploadedBy);
 
-  const likes = await ctx.db
-    .query("likes")
-    .withIndex("by_paperId", (q) => q.eq("paperId", paper._id))
-    .collect();
-
-  const comments = await ctx.db
-    .query("comments")
-    .withIndex("by_paperId_createdAt", (q) => q.eq("paperId", paper._id))
-    .collect();
-
   return {
     ...paper,
     uploader: {
@@ -61,8 +51,8 @@ const enrichPaper = async (ctx, paper) => {
       image: uploader?.image ?? "",
     },
     stats: {
-      likeCount: likes.length,
-      commentCount: comments.length,
+      likeCount: paper.likeCount ?? 0,
+      commentCount: paper.commentCount ?? 0,
       likedByMe: false,
     },
   };
@@ -198,16 +188,17 @@ export const listUsers = query({
     await requireValidSession(ctx, args.token);
 
     const users = await ctx.db.query("users").order("desc").take(500);
+    const papers = await ctx.db.query("papers").order("desc").take(5000);
+    const uploadsByUser = new Map();
+    for (const paper of papers) {
+      uploadsByUser.set(paper.uploadedBy, (uploadsByUser.get(paper.uploadedBy) ?? 0) + 1);
+    }
+
     return Promise.all(
       users.map(async (user) => {
-        const uploads = await ctx.db
-          .query("papers")
-          .withIndex("by_uploadedBy_createdAt", (q) => q.eq("uploadedBy", user._id))
-          .collect();
-
         return {
           ...user,
-          uploadCount: uploads.length,
+          uploadCount: uploadsByUser.get(user._id) ?? 0,
         };
       }),
     );
@@ -327,6 +318,12 @@ export const deleteUser = mutation({
       .withIndex("by_userId_createdAt", (q) => q.eq("userId", args.userId))
       .collect();
     for (const comment of comments) {
+      const paper = await ctx.db.get(comment.paperId);
+      if (paper) {
+        await ctx.db.patch(paper._id, {
+          commentCount: Math.max((paper.commentCount ?? 0) - 1, 0),
+        });
+      }
       await ctx.db.delete(comment._id);
     }
 
@@ -335,6 +332,12 @@ export const deleteUser = mutation({
       .withIndex("by_userId_createdAt", (q) => q.eq("userId", args.userId))
       .collect();
     for (const like of likes) {
+      const paper = await ctx.db.get(like.paperId);
+      if (paper) {
+        await ctx.db.patch(paper._id, {
+          likeCount: Math.max((paper.likeCount ?? 0) - 1, 0),
+        });
+      }
       await ctx.db.delete(like._id);
     }
 

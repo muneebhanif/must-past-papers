@@ -34,17 +34,27 @@ export const create = mutation({
   },
   handler: async (ctx, args) => {
     const user = await requireUser(ctx);
+    const paper = await ctx.db.get(args.paperId);
+    if (!paper) {
+      throw new Error("Paper not found.");
+    }
 
     const cleanContent = args.content.trim();
     if (cleanContent.length < 2 || cleanContent.length > 500) {
       throw new Error("Comment must be between 2 and 500 characters.");
     }
 
-    return ctx.db.insert("comments", {
+    const commentId = await ctx.db.insert("comments", {
       paperId: args.paperId,
       userId: user._id,
       content: cleanContent,
       createdAt: Date.now(),
     });
+
+    await ctx.db.patch(args.paperId, {
+      commentCount: (paper.commentCount ?? 0) + 1,
+    });
+
+    return commentId;
   },
 });

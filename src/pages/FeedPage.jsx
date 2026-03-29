@@ -45,7 +45,7 @@ export function FeedPage({ department, setDepartment, search, onRequireAuth }) {
       <LoginSplash />
 
       <header className="rounded-xl bg-white p-4 shadow-sm">
-        <div className="mb-4 rounded-xl bg-slate-50 p-3">
+        <div className="mb-4 rounded-xl bg-slate-50 p-3 xl:hidden">
           <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-slate-400 md:text-xs">
             Departments
           </p>
