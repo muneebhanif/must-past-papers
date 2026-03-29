@@ -105,7 +105,7 @@ export function PaperCard({ paper, onRequireAuth }) {
         </div>
       </div>
 
-      <div className="relative aspect-[16/9] w-full overflow-hidden border-y border-slate-100 bg-slate-50">
+      <div className="relative h-80 w-full overflow-hidden border-y border-slate-100 bg-slate-50 md:h-[30rem] lg:h-[34rem]">
         <button
           type="button"
           onClick={() => setViewerOpen(true)}
