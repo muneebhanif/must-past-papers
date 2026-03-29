@@ -51,6 +51,8 @@ export const rejectPaperAndCleanup = action({
       throw new Error("Admin session expired. Please sign in again.");
     }
 
+    const reviewNote = (args.reviewNote ?? "").trim() || "Rejected by admin.";
+
     const cleanupData = await ctx.runQuery(api.adminPanel.getPaperCleanupData, {
       token: args.token,
       paperId: args.paperId,
@@ -82,7 +84,7 @@ export const rejectPaperAndCleanup = action({
       token: args.token,
       paperId: args.paperId,
       status: "rejected",
-      reviewNote: args.reviewNote,
+      reviewNote,
     });
 
     return { ok: true };

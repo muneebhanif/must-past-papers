@@ -83,6 +83,12 @@ export function AdminPage() {
   const onModerate = async (paperId, status) => {
     const note = (reviewNoteByPaper[paperId] ?? "").trim();
     setError("");
+
+    if (status === "rejected" && !note) {
+      setError("Please add a rejection note before rejecting.");
+      return;
+    }
+
     try {
       if (status === "rejected") {
         await rejectPaperAndCleanup({
