@@ -202,6 +202,64 @@ export const listUsers = query({
   },
 });
 
+export const listActivity = query({
+  args: {
+    token: v.string(),
+    limit: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    await requireValidSession(ctx, args.token);
+
+    const limit = Math.min(Math.max(args.limit ?? 80, 20), 200);
+    const perTypeLimit = Math.ceil(limit / 2);
+
+    const [recentComments, recentLikes] = await Promise.all([
+      ctx.db.query("comments").order("desc").take(perTypeLimit),
+      ctx.db.query("likes").order("desc").take(perTypeLimit),
+    ]);
+
+    const commentEvents = await Promise.all(
+      recentComments.map(async (comment) => {
+        const [actor, paper] = await Promise.all([
+          ctx.db.get(comment.userId),
+          ctx.db.get(comment.paperId),
+        ]);
+
+        return {
+          id: `comment_${comment._id}`,
+          type: "comment",
+          createdAt: comment.createdAt,
+          actorName: actor?.username ?? actor?.name ?? "student",
+          paperTitle: paper?.title ?? "Deleted paper",
+          content: comment.content,
+        };
+      }),
+    );
+
+    const likeEvents = await Promise.all(
+      recentLikes.map(async (like) => {
+        const [actor, paper] = await Promise.all([
+          ctx.db.get(like.userId),
+          ctx.db.get(like.paperId),
+        ]);
+
+        return {
+          id: `like_${like._id}`,
+          type: "like",
+          createdAt: like.createdAt,
+          actorName: actor?.username ?? actor?.name ?? "student",
+          paperTitle: paper?.title ?? "Deleted paper",
+          content: undefined,
+        };
+      }),
+    );
+
+    return [...commentEvents, ...likeEvents]
+      .sort((a, b) => b.createdAt - a.createdAt)
+      .slice(0, limit);
+  },
+});
+
 export const createUser = mutation({
   args: {
     token: v.string(),

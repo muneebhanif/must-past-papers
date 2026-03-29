@@ -6,8 +6,11 @@ import { ImageViewerModal } from "../common/ImageViewerModal";
 
 export function PaperCard({ paper, onRequireAuth }) {
   const { isAuthenticated } = useConvexAuth();
+  const me = useQuery(api.users.current, isAuthenticated ? {} : "skip");
   const toggleLike = useMutation(api.papers.toggleLike);
   const createComment = useMutation(api.comments.create);
+  const updateComment = useMutation(api.comments.update);
+  const deleteComment = useMutation(api.comments.remove);
   const comments = useQuery(api.comments.listByPaper, { paperId: paper._id }) ?? [];
 
   const [comment, setComment] = useState("");
@@ -17,6 +20,11 @@ export function PaperCard({ paper, onRequireAuth }) {
   const [viewerImages, setViewerImages] = useState([]);
   const [menuOpen, setMenuOpen] = useState(false);
   const [downloadError, setDownloadError] = useState("");
+  const [showAllComments, setShowAllComments] = useState(false);
+  const [editingCommentId, setEditingCommentId] = useState("");
+  const [editingCommentValue, setEditingCommentValue] = useState("");
+  const [commentActionBusy, setCommentActionBusy] = useState(false);
+  const [commentActionError, setCommentActionError] = useState("");
 
   const safePreviewUrl = paper.imageUrl;
   const secondPreviewUrl = paper.secondImageUrl;
@@ -78,6 +86,51 @@ export function PaperCard({ paper, onRequireAuth }) {
       setComment("");
     } finally {
       setIsPosting(false);
+    }
+  };
+
+  const onStartEditComment = (item) => {
+    setCommentActionError("");
+    setEditingCommentId(item._id);
+    setEditingCommentValue(item.content);
+  };
+
+  const onSaveEditedComment = async (commentId) => {
+    if (!editingCommentValue.trim()) {
+      setCommentActionError("Comment cannot be empty.");
+      return;
+    }
+
+    try {
+      setCommentActionBusy(true);
+      setCommentActionError("");
+      await updateComment({ commentId, content: editingCommentValue });
+      setEditingCommentId("");
+      setEditingCommentValue("");
+    } catch (err) {
+      setCommentActionError(err?.message || "Could not update comment.");
+    } finally {
+      setCommentActionBusy(false);
+    }
+  };
+
+  const onDeleteComment = async (commentId) => {
+    if (!window.confirm("Delete this comment?")) {
+      return;
+    }
+
+    try {
+      setCommentActionBusy(true);
+      setCommentActionError("");
+      await deleteComment({ commentId });
+      if (editingCommentId === commentId) {
+        setEditingCommentId("");
+        setEditingCommentValue("");
+      }
+    } catch (err) {
+      setCommentActionError(err?.message || "Could not delete comment.");
+    } finally {
+      setCommentActionBusy(false);
     }
   };
 
@@ -247,8 +300,10 @@ export function PaperCard({ paper, onRequireAuth }) {
           </button>
         </form>
 
+        {commentActionError ? <p className="mt-2 text-xs font-semibold text-red-600">{commentActionError}</p> : null}
+
         <div className="mt-2 space-y-2">
-          {comments.slice(0, 3).map((item) => (
+          {(showAllComments ? comments : comments.slice(0, 2)).map((item) => (
             <div key={item._id} className="rounded-lg bg-slate-50 px-3 py-2 text-sm">
               <div className="mb-1 flex items-center gap-2">
                 <img
@@ -258,10 +313,78 @@ export function PaperCard({ paper, onRequireAuth }) {
                   loading="lazy"
                 />
                 <span className="font-semibold text-slate-700">{item.user.name}</span>
+                {item.editedAt ? (
+                  <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">edited</span>
+                ) : null}
               </div>
-              <p className="text-slate-600">{item.content}</p>
+
+              {editingCommentId === item._id ? (
+                <div className="space-y-2">
+                  <textarea
+                    value={editingCommentValue}
+                    onChange={(e) => setEditingCommentValue(e.target.value)}
+                    rows={2}
+                    className="w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm"
+                  />
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      onClick={() => void onSaveEditedComment(item._id)}
+                      disabled={commentActionBusy}
+                      className="rounded-md bg-blue-600 px-2 py-1 text-xs font-semibold text-white disabled:opacity-60"
+                    >
+                      Save
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditingCommentId("");
+                        setEditingCommentValue("");
+                      }}
+                      disabled={commentActionBusy}
+                      className="rounded-md bg-slate-200 px-2 py-1 text-xs font-semibold text-slate-700 disabled:opacity-60"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <p className="text-slate-600">{item.content}</p>
+                  {me?._id === item.user._id ? (
+                    <div className="mt-2 flex gap-2">
+                      <button
+                        type="button"
+                        onClick={() => onStartEditComment(item)}
+                        disabled={commentActionBusy}
+                        className="rounded-md bg-slate-200 px-2 py-1 text-[11px] font-semibold text-slate-700 disabled:opacity-60"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => void onDeleteComment(item._id)}
+                        disabled={commentActionBusy}
+                        className="rounded-md bg-red-100 px-2 py-1 text-[11px] font-semibold text-red-700 disabled:opacity-60"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  ) : null}
+                </>
+              )}
             </div>
           ))}
+
+          {comments.length > 2 ? (
+            <button
+              type="button"
+              onClick={() => setShowAllComments((value) => !value)}
+              className="text-xs font-semibold text-blue-600 hover:text-blue-700"
+            >
+              {showAllComments ? "Show fewer comments" : `View all ${comments.length} comments`}
+            </button>
+          ) : null}
         </div>
       </div>
 

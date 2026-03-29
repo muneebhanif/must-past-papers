@@ -59,6 +59,7 @@ export default defineSchema({
     userId: v.id("users"),
     content: v.string(),
     createdAt: v.number(),
+    editedAt: v.optional(v.number()),
   })
     .index("by_paperId_createdAt", ["paperId", "createdAt"])
     .index("by_userId_createdAt", ["userId", "createdAt"]),
