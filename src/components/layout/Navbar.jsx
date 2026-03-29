@@ -1,11 +1,8 @@
-import { useQuery } from "convex/react";
 import { Link, useLocation } from "react-router-dom";
-import { api } from "../../lib/api";
 import { AuthButton } from "../auth/AuthButton";
 import mustLogo from "../../assets/must-logo.png";
 
 export function Navbar({ search, setSearch }) {
-  const me = useQuery(api.users.current);
   const location = useLocation();
 
   return (
@@ -47,17 +44,6 @@ export function Navbar({ search, setSearch }) {
               {label}
             </Link>
           ))}
-
-          {me?.isAdmin ? (
-            <Link
-              to="/admin"
-              className={`rounded-lg px-3 py-2 text-sm font-semibold ${
-                location.pathname === "/admin" ? "bg-blue-100 text-blue-700" : "text-slate-600"
-              }`}
-            >
-              Admin
-            </Link>
-          ) : null}
 
           <AuthButton />
         </div>

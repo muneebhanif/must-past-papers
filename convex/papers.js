@@ -31,7 +31,7 @@ const enrichPaper = async (ctx, paper, viewerId) => {
     ...paper,
     uploader: {
       _id: uploader?._id,
-      name: uploader?.name ?? "Unknown user",
+      name: uploader?.username ?? uploader?.name ?? "student",
       image: uploader?.image ?? "",
     },
     stats: {
@@ -253,7 +253,7 @@ export const rightRailData = query({
         const user = await ctx.db.get(userId);
         return {
           userId,
-          name: user?.name ?? "Unknown",
+          name: user?.username ?? user?.name ?? "student",
           image: user?.image ?? "",
           approvedCount,
         };

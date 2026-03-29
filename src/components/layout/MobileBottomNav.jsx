@@ -1,16 +1,12 @@
-import { useQuery } from "convex/react";
 import { Link, useLocation } from "react-router-dom";
-import { api } from "../../lib/api";
 
 export function MobileBottomNav() {
-  const me = useQuery(api.users.current);
   const location = useLocation();
 
   const items = [
     { to: "/", label: "Home" },
     { to: "/upload", label: "Upload" },
     { to: "/profile", label: "Profile" },
-    ...(me?.isAdmin ? [{ to: "/admin", label: "Admin" }] : []),
   ];
 
   return (

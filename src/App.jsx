@@ -12,6 +12,7 @@ import { ProfilePage } from "./pages/ProfilePage";
 import { AdminPage } from "./pages/AdminPage";
 import { DEPARTMENTS } from "./constants/departments";
 import { api } from "./lib/api";
+import { ADMIN_PANEL_PATH } from "./lib/adminPath";
 
 export default function App() {
   const { isAuthenticated } = useConvexAuth();
@@ -50,7 +51,7 @@ export default function App() {
               element={<UploadPage onRequireAuth={() => setAuthPromptOpen(true)} />}
             />
             <Route path="/profile" element={<ProfilePage />} />
-            <Route path="/admin" element={<AdminPage />} />
+            <Route path={ADMIN_PANEL_PATH} element={<AdminPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </section>

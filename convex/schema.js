@@ -5,6 +5,7 @@ import { v } from "convex/values";
 export default defineSchema({
   ...authTables,
   users: defineTable({
+    username: v.optional(v.string()),
     name: v.optional(v.string()),
     email: v.optional(v.string()),
     phone: v.optional(v.string()),
@@ -14,8 +15,16 @@ export default defineSchema({
     isAnonymous: v.optional(v.boolean()),
     isAdmin: v.optional(v.boolean()),
   })
+    .index("username", ["username"])
     .index("email", ["email"])
     .index("phone", ["phone"]),
+
+  adminSessions: defineTable({
+    token: v.string(),
+    email: v.string(),
+    expiresAt: v.number(),
+    createdAt: v.number(),
+  }).index("by_token", ["token"]),
 
   papers: defineTable({
     title: v.string(),

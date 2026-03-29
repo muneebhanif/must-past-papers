@@ -18,7 +18,7 @@ export const listByPaper = query({
           ...comment,
           user: {
             _id: user?._id,
-            name: user?.name ?? "Unknown",
+            name: user?.username ?? user?.name ?? "student",
             image: user?.image ?? "",
           },
         };
