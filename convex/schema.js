@@ -72,6 +72,18 @@ export default defineSchema({
     .index("by_paperId_userId", ["paperId", "userId"])
     .index("by_userId_createdAt", ["userId", "createdAt"]),
 
+  notifications: defineTable({
+    userId: v.id("users"),
+    actorId: v.id("users"),
+    paperId: v.id("papers"),
+    type: v.union(v.literal("like"), v.literal("comment")),
+    content: v.optional(v.string()),
+    read: v.boolean(),
+    createdAt: v.number(),
+  })
+    .index("by_userId_createdAt", ["userId", "createdAt"])
+    .index("by_userId_read_createdAt", ["userId", "read", "createdAt"]),
+
   uploadAuthLogs: defineTable({
     userId: v.id("users"),
     createdAt: v.number(),

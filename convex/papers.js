@@ -351,6 +351,14 @@ export const deleteMyPaper = mutation({
       await ctx.db.delete(like._id);
     }
 
+    const notifications = await ctx.db
+      .query("notifications")
+      .filter((q) => q.eq(q.field("paperId"), args.paperId))
+      .collect();
+    for (const notification of notifications) {
+      await ctx.db.delete(notification._id);
+    }
+
     await ctx.db.delete(args.paperId);
     return { ok: true };
   },
@@ -430,6 +438,17 @@ export const toggleLike = mutation({
     await ctx.db.patch(args.paperId, {
       likeCount: (paper.likeCount ?? 0) + 1,
     });
+
+    if (paper.uploadedBy !== user._id) {
+      await ctx.db.insert("notifications", {
+        userId: paper.uploadedBy,
+        actorId: user._id,
+        paperId: paper._id,
+        type: "like",
+        read: false,
+        createdAt: Date.now(),
+      });
+    }
 
     return { liked: true };
   },

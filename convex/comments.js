@@ -55,6 +55,18 @@ export const create = mutation({
       commentCount: (paper.commentCount ?? 0) + 1,
     });
 
+    if (paper.uploadedBy !== user._id) {
+      await ctx.db.insert("notifications", {
+        userId: paper.uploadedBy,
+        actorId: user._id,
+        paperId: paper._id,
+        type: "comment",
+        content: cleanContent.slice(0, 140),
+        read: false,
+        createdAt: Date.now(),
+      });
+    }
+
     return commentId;
   },
 });

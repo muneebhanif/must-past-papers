@@ -1,11 +1,24 @@
 import { useEffect, useState } from "react";
+import { useConvexAuth, useMutation, useQuery } from "convex/react";
 import { Link, useLocation } from "react-router-dom";
 import { AuthButton } from "../auth/AuthButton";
 import mustLogo from "../../assets/must-logo.png";
+import { api } from "../../lib/api";
 
 export function Navbar({ search, setSearch }) {
   const location = useLocation();
+  const { isAuthenticated } = useConvexAuth();
+  const markAllRead = useMutation(api.notifications.markAllRead);
+  const notifications = useQuery(
+    api.notifications.listForMe,
+    isAuthenticated ? { limit: 12 } : "skip",
+  ) ?? [];
+  const unreadCount = useQuery(
+    api.notifications.unreadCount,
+    isAuthenticated ? {} : "skip",
+  ) ?? 0;
   const [theme, setTheme] = useState("light");
+  const [isNotificationsOpen, setNotificationsOpen] = useState(false);
 
   useEffect(() => {
     const savedTheme = localStorage.getItem("theme");
@@ -24,6 +37,20 @@ export function Navbar({ search, setSearch }) {
   };
 
   const isDark = theme === "dark";
+
+  const notificationText = (item) => {
+    if (item.type === "like") {
+      return `${item.actorName} liked ${item.paperTitle}`;
+    }
+    return `${item.actorName} commented on ${item.paperTitle}`;
+  };
+
+  const openNotifications = async () => {
+    setNotificationsOpen((value) => !value);
+    if (unreadCount > 0) {
+      await markAllRead({});
+    }
+  };
 
   return (
     <nav className={`sticky top-0 z-50 border-b backdrop-blur-xl ${
@@ -88,10 +115,66 @@ export function Navbar({ search, setSearch }) {
               {theme === "dark" ? "☀ Light" : "🌙 Dark"}
             </button>
 
+            {isAuthenticated ? (
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => void openNotifications()}
+                  className={`rounded-lg px-3 py-2 text-sm font-semibold ${
+                    isDark ? "bg-slate-800 text-slate-200" : "bg-slate-100 text-slate-700"
+                  }`}
+                >
+                  🔔
+                  {unreadCount ? (
+                    <span className="ml-1 rounded-full bg-red-500 px-1.5 py-0.5 text-[10px] font-bold text-white">
+                      {unreadCount > 9 ? "9+" : unreadCount}
+                    </span>
+                  ) : null}
+                </button>
+
+                {isNotificationsOpen ? (
+                  <div className={`absolute right-0 top-12 z-[160] w-80 rounded-xl border p-2 shadow-xl ${
+                    isDark ? "border-slate-700 bg-slate-900" : "border-slate-200 bg-white"
+                  }`}>
+                    <p className="px-2 pb-1 text-xs font-bold uppercase tracking-wider text-slate-500">Notifications</p>
+                    <div className="max-h-80 space-y-1 overflow-auto">
+                      {notifications.length ? notifications.map((item) => (
+                        <div key={item._id} className={`rounded-lg px-2 py-2 text-xs ${item.read ? "opacity-80" : "font-semibold"}`}>
+                          <p className={isDark ? "text-slate-200" : "text-slate-700"}>{notificationText(item)}</p>
+                          {item.type === "comment" && item.content ? (
+                            <p className="mt-0.5 truncate text-[11px] text-slate-500">“{item.content}”</p>
+                          ) : null}
+                        </div>
+                      )) : (
+                        <p className="px-2 py-3 text-xs text-slate-500">No notifications yet.</p>
+                      )}
+                    </div>
+                  </div>
+                ) : null}
+              </div>
+            ) : null}
+
             <AuthButton />
           </div>
 
           <div className="xl:hidden flex shrink-0 items-center gap-2">
+            {isAuthenticated ? (
+              <button
+                type="button"
+                onClick={() => void openNotifications()}
+                className={`relative rounded-lg px-2.5 py-2 text-xs font-semibold ${
+                  isDark ? "bg-slate-800 text-slate-200" : "bg-slate-100 text-slate-700"
+                }`}
+                aria-label="Notifications"
+              >
+                🔔
+                {unreadCount ? (
+                  <span className="absolute -right-1 -top-1 rounded-full bg-red-500 px-1 py-0.5 text-[9px] font-bold text-white">
+                    {unreadCount > 9 ? "9+" : unreadCount}
+                  </span>
+                ) : null}
+              </button>
+            ) : null}
             <button
               type="button"
               onClick={onToggleTheme}
@@ -105,6 +188,26 @@ export function Navbar({ search, setSearch }) {
             <AuthButton />
           </div>
         </div>
+
+        {isAuthenticated && isNotificationsOpen ? (
+          <div className={`mt-2 xl:hidden rounded-xl border p-2 shadow-sm ${
+            isDark ? "border-slate-700 bg-slate-900" : "border-slate-200 bg-white"
+          }`}>
+            <p className="px-2 pb-1 text-[11px] font-bold uppercase tracking-wider text-slate-500">Notifications</p>
+            <div className="max-h-52 space-y-1 overflow-auto">
+              {notifications.length ? notifications.map((item) => (
+                <div key={item._id} className={`rounded-lg px-2 py-2 text-xs ${item.read ? "opacity-80" : "font-semibold"}`}>
+                  <p className={isDark ? "text-slate-200" : "text-slate-700"}>{notificationText(item)}</p>
+                  {item.type === "comment" && item.content ? (
+                    <p className="mt-0.5 truncate text-[11px] text-slate-500">“{item.content}”</p>
+                  ) : null}
+                </div>
+              )) : (
+                <p className="px-2 py-3 text-xs text-slate-500">No notifications yet.</p>
+              )}
+            </div>
+          </div>
+        ) : null}
 
         <div className={`mt-2 lg:hidden rounded-xl px-3 py-2 ${isDark ? "bg-slate-800" : "bg-slate-100"}`}>
           <input

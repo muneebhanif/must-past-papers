@@ -8,6 +8,7 @@ export const DEPARTMENTS = [
   "Software Engineering",
   "Electrical Engineering",
   "Business Admin",
+  "BBA",
   "Civil Engineering",
   "Mathematics",
 ];
