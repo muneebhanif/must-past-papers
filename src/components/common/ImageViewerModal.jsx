@@ -79,23 +79,25 @@ export function ImageViewerModal({ open, onClose, images, title }) {
         className="relative h-full w-full p-2 sm:p-4"
         onClick={(event) => event.stopPropagation()}
       >
-        <button
-          type="button"
-          onClick={onClose}
-          className="absolute right-4 top-4 z-20 rounded-full bg-black/70 px-3 py-1 text-sm font-bold text-white ring-1 ring-white/20"
-          aria-label="Close image viewer"
-        >
-          ✕
-        </button>
+        <div className="pointer-events-none absolute left-0 right-0 top-0 z-30 flex items-start justify-between p-2 sm:p-4">
+          {downloadError ? (
+            <p className="pointer-events-auto rounded-md bg-red-600/90 px-2.5 py-1 text-xs font-semibold text-white">
+              {downloadError}
+            </p>
+          ) : <span />}
 
-        {downloadError ? (
-          <p className="absolute left-4 top-4 z-20 rounded-md bg-red-600/90 px-2.5 py-1 text-xs font-semibold text-white">
-            {downloadError}
-          </p>
-        ) : null}
+          <button
+            type="button"
+            onClick={onClose}
+            className="pointer-events-auto rounded-full bg-black/70 px-3 py-1 text-sm font-bold text-white ring-1 ring-white/20"
+            aria-label="Close image viewer"
+          >
+            ✕
+          </button>
+        </div>
 
         <div
-          className={`mx-auto h-full max-w-7xl overflow-auto rounded-2xl border border-white/10 bg-black/35 p-2 shadow-2xl sm:p-3 ${
+          className={`mx-auto h-full max-w-7xl overflow-auto rounded-2xl border border-white/10 bg-black/35 p-2 pt-12 shadow-2xl sm:p-3 sm:pt-14 ${
             visibleImages.length > 1 ? "grid grid-cols-1 gap-2 md:grid-cols-2" : "grid grid-cols-1"
           }`}
         >
