@@ -33,8 +33,12 @@ export function PaperCard({ paper, onRequireAuth }) {
       const blob = await response.blob();
       const objectUrl = URL.createObjectURL(blob);
       const a = document.createElement("a");
+      const randomPart =
+        (globalThis.crypto?.randomUUID?.() ?? `${Date.now()}_${Math.random().toString(36).slice(2)}`)
+          .replace(/-/g, "")
+          .slice(0, 20);
       a.href = objectUrl;
-      a.download = `${paper.title.replace(/[^a-z0-9_-]/gi, "_") || "paper"}.jpg`;
+      a.download = `paper_${randomPart}.jpg`;
       document.body.appendChild(a);
       a.click();
       a.remove();
