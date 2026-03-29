@@ -17,9 +17,15 @@ export function PaperCard({ paper, onRequireAuth }) {
   const [downloadError, setDownloadError] = useState("");
 
   const safePreviewUrl = paper.imageUrl;
+  const secondPreviewUrl = paper.secondImageUrl;
   const safeFeedImageUrl = paper.imageUrl.includes("?")
     ? `${paper.imageUrl}&tr=w-1200,q-80`
     : `${paper.imageUrl}?tr=w-1200,q-80`;
+  const safeSecondFeedImageUrl = secondPreviewUrl
+    ? (secondPreviewUrl.includes("?")
+      ? `${secondPreviewUrl}&tr=w-1200,q-80`
+      : `${secondPreviewUrl}?tr=w-1200,q-80`)
+    : "";
 
   const onDownload = async () => {
     try {
@@ -109,24 +115,62 @@ export function PaperCard({ paper, onRequireAuth }) {
         </div>
       </div>
 
-      <div className="relative h-[24rem] w-full overflow-hidden border-y border-slate-100 bg-slate-50 md:h-[32rem] lg:h-[37rem]">
-        <button
-          type="button"
-          onClick={() => setViewerOpen(true)}
-          className="h-full w-full"
-          aria-label="Open paper"
-        >
-          <img
-            src={safeFeedImageUrl}
-            alt={paper.title}
-            className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
-            loading="lazy"
-            onError={(e) => {
-              e.currentTarget.src = safePreviewUrl;
-            }}
-          />
-        </button>
-      </div>
+      {secondPreviewUrl ? (
+        <div className="grid h-[24rem] w-full grid-cols-2 overflow-hidden border-y border-slate-100 bg-slate-50 md:h-[32rem] lg:h-[37rem]">
+          <button
+            type="button"
+            onClick={() => setViewerOpen(true)}
+            className="h-full w-full border-r border-slate-100"
+            aria-label="Open paper front page"
+          >
+            <img
+              src={safeFeedImageUrl}
+              alt={`${paper.title} front page`}
+              className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+              loading="lazy"
+              onError={(e) => {
+                e.currentTarget.src = safePreviewUrl;
+              }}
+            />
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setViewerOpen(true)}
+            className="h-full w-full"
+            aria-label="Open paper back page"
+          >
+            <img
+              src={safeSecondFeedImageUrl}
+              alt={`${paper.title} back page`}
+              className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+              loading="lazy"
+              onError={(e) => {
+                e.currentTarget.src = secondPreviewUrl;
+              }}
+            />
+          </button>
+        </div>
+      ) : (
+        <div className="relative h-[24rem] w-full overflow-hidden border-y border-slate-100 bg-slate-50 md:h-[32rem] lg:h-[37rem]">
+          <button
+            type="button"
+            onClick={() => setViewerOpen(true)}
+            className="h-full w-full"
+            aria-label="Open paper"
+          >
+            <img
+              src={safeFeedImageUrl}
+              alt={paper.title}
+              className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+              loading="lazy"
+              onError={(e) => {
+                e.currentTarget.src = safePreviewUrl;
+              }}
+            />
+          </button>
+        </div>
+      )}
 
       <div className="p-5 md:px-6 md:pb-6 md:pt-4">
         <div className="flex items-center justify-between border-t border-slate-100 pt-3 text-sm text-slate-600">
@@ -225,7 +269,7 @@ export function PaperCard({ paper, onRequireAuth }) {
           className="fixed inset-0 z-[120] flex items-center justify-center bg-black/80 p-4"
           onClick={() => setViewerOpen(false)}
         >
-          <div className="relative max-h-[92vh] w-full max-w-6xl" onClick={(e) => e.stopPropagation()}>
+          <div className="relative max-h-[92vh] w-full max-w-6xl overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             <button
               type="button"
               onClick={() => setViewerOpen(false)}
@@ -233,11 +277,20 @@ export function PaperCard({ paper, onRequireAuth }) {
             >
               ✕
             </button>
-            <img
-              src={safePreviewUrl}
-              alt={paper.title}
-              className="max-h-[92vh] w-full rounded-xl bg-black object-contain"
-            />
+            <div className="space-y-3 pr-1">
+              <img
+                src={safePreviewUrl}
+                alt={`${paper.title} front page`}
+                className="max-h-[92vh] w-full rounded-xl bg-black object-contain"
+              />
+              {secondPreviewUrl ? (
+                <img
+                  src={secondPreviewUrl}
+                  alt={`${paper.title} back page`}
+                  className="max-h-[92vh] w-full rounded-xl bg-black object-contain"
+                />
+              ) : null}
+            </div>
           </div>
         </div>
       ) : null}

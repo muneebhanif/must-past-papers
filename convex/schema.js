@@ -34,6 +34,7 @@ export default defineSchema({
     type: v.string(),
     department: v.string(),
     imageUrl: v.string(),
+    secondImageUrl: v.optional(v.string()),
     uploadedBy: v.id("users"),
     status: v.union(
       v.literal("pending"),

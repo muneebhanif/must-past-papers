@@ -355,7 +355,7 @@ export function AdminPage() {
           className="fixed inset-0 z-[120] flex items-center justify-center bg-black/80 p-4"
           onClick={() => setActivePaper(null)}
         >
-          <div className="relative max-h-[92vh] w-full max-w-6xl" onClick={(e) => e.stopPropagation()}>
+          <div className="relative max-h-[92vh] w-full max-w-6xl overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             <button
               type="button"
               onClick={() => setActivePaper(null)}
@@ -363,11 +363,20 @@ export function AdminPage() {
             >
               ✕
             </button>
-            <img
-              src={activePaper.imageUrl}
-              alt={activePaper.title}
-              className="max-h-[92vh] w-full rounded-xl bg-black object-contain"
-            />
+            <div className="space-y-3 pr-1">
+              <img
+                src={activePaper.imageUrl}
+                alt={`${activePaper.title} front page`}
+                className="max-h-[92vh] w-full rounded-xl bg-black object-contain"
+              />
+              {activePaper.secondImageUrl ? (
+                <img
+                  src={activePaper.secondImageUrl}
+                  alt={`${activePaper.title} back page`}
+                  className="max-h-[92vh] w-full rounded-xl bg-black object-contain"
+                />
+              ) : null}
+            </div>
           </div>
         </div>
       ) : null}

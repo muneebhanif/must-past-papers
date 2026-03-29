@@ -190,33 +190,44 @@ export const create = mutation({
     type: v.string(),
     department: v.string(),
     imageUrl: v.string(),
+    secondImageUrl: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const user = await requireUser(ctx);
     const now = Date.now();
     const imageUrl = sanitizeText(args.imageUrl, 600);
+    const secondImageUrl = args.secondImageUrl
+      ? sanitizeText(args.secondImageUrl, 600)
+      : undefined;
 
-    let parsedImageUrl;
-    try {
-      parsedImageUrl = new URL(imageUrl);
-    } catch {
-      throw new ConvexError("Invalid image URL.");
-    }
-
-    if (parsedImageUrl.protocol !== "https:") {
-      throw new ConvexError("Image URL must use HTTPS.");
-    }
-
-    const endpoint = process.env.IMAGEKIT_URL_ENDPOINT;
-    if (endpoint) {
+    const validateImageUrl = (url, label) => {
+      let parsedImageUrl;
       try {
-        const endpointHost = new URL(endpoint).hostname;
-        if (parsedImageUrl.hostname !== endpointHost) {
-          throw new ConvexError("Image URL host is not allowed.");
-        }
+        parsedImageUrl = new URL(url);
       } catch {
-        throw new ConvexError("Server image host configuration is invalid.");
+        throw new ConvexError(`Invalid ${label} URL.`);
       }
+
+      if (parsedImageUrl.protocol !== "https:") {
+        throw new ConvexError(`${label} URL must use HTTPS.`);
+      }
+
+      const endpoint = process.env.IMAGEKIT_URL_ENDPOINT;
+      if (endpoint) {
+        try {
+          const endpointHost = new URL(endpoint).hostname;
+          if (parsedImageUrl.hostname !== endpointHost) {
+            throw new ConvexError(`${label} URL host is not allowed.`);
+          }
+        } catch {
+          throw new ConvexError("Server image host configuration is invalid.");
+        }
+      }
+    };
+
+    validateImageUrl(imageUrl, "Image");
+    if (secondImageUrl) {
+      validateImageUrl(secondImageUrl, "Second image");
     }
 
     const recent15MinUploads = await ctx.db
@@ -246,6 +257,7 @@ export const create = mutation({
     return ctx.db.insert("papers", {
       ...validated,
       imageUrl,
+      secondImageUrl,
       uploadedBy: user._id,
       status: "pending",
       reviewNote: undefined,

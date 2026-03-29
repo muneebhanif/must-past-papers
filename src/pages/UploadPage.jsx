@@ -19,22 +19,35 @@ export function UploadPage({ onRequireAuth }) {
     type: "Midterm",
     department: "Computer Science",
   });
-  const [file, setFile] = useState(null);
-  const [filePreview, setFilePreview] = useState("");
+  const [frontFile, setFrontFile] = useState(null);
+  const [backFile, setBackFile] = useState(null);
+  const [frontPreview, setFrontPreview] = useState("");
+  const [backPreview, setBackPreview] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
   useEffect(() => {
-    if (!file) {
-      setFilePreview("");
+    if (!frontFile) {
+      setFrontPreview("");
       return;
     }
 
-    const objectUrl = URL.createObjectURL(file);
-    setFilePreview(objectUrl);
+    const objectUrl = URL.createObjectURL(frontFile);
+    setFrontPreview(objectUrl);
     return () => URL.revokeObjectURL(objectUrl);
-  }, [file]);
+  }, [frontFile]);
+
+  useEffect(() => {
+    if (!backFile) {
+      setBackPreview("");
+      return;
+    }
+
+    const objectUrl = URL.createObjectURL(backFile);
+    setBackPreview(objectUrl);
+    return () => URL.revokeObjectURL(objectUrl);
+  }, [backFile]);
 
   const onSubmit = async (e) => {
     e.preventDefault();
@@ -61,17 +74,26 @@ export function UploadPage({ onRequireAuth }) {
     if (!PAPER_TYPES.includes(clean.type)) return setError("Invalid paper type selected.");
     if (!ACADEMIC_YEARS.includes(clean.year)) return setError("Invalid year selected.");
 
-    if (!file) return setError("Please select a JPEG image.");
-    if (file.type !== "image/jpeg") return setError("Only image/jpeg is allowed.");
-    if (file.size > 5 * 1024 * 1024) return setError("File size must be 5MB or less.");
+    const validateJpeg = (selectedFile, label, required = false) => {
+      if (!selectedFile) {
+        if (required) {
+          throw new Error(`Please select the ${label} JPEG image.`);
+        }
+        return;
+      }
+      if (selectedFile.type !== "image/jpeg") {
+        throw new Error(`${label} must be image/jpeg.`);
+      }
+      if (selectedFile.size > 5 * 1024 * 1024) {
+        throw new Error(`${label} size must be 5MB or less.`);
+      }
+    };
 
-    try {
-      setIsSubmitting(true);
+    const uploadSingleFile = async (selectedFile) => {
       const auth = await getUploadAuth({});
-
       const body = new FormData();
-      body.append("file", file);
-      body.append("fileName", `${Date.now()}-${file.name.replace(/\s+/g, "-")}`);
+      body.append("file", selectedFile);
+      body.append("fileName", `${Date.now()}-${selectedFile.name.replace(/\s+/g, "-")}`);
       body.append("publicKey", auth.publicKey);
       body.append("signature", auth.signature);
       body.append("expire", String(auth.expire));
@@ -83,6 +105,7 @@ export function UploadPage({ onRequireAuth }) {
         method: "POST",
         body,
       });
+
       if (!uploadResponse.ok) {
         let detail = "Image upload failed.";
         try {
@@ -93,9 +116,27 @@ export function UploadPage({ onRequireAuth }) {
         }
         throw new Error(detail);
       }
-      const uploadResult = await uploadResponse.json();
 
-      await createPaper({ ...clean, imageUrl: uploadResult.url });
+      return uploadResponse.json();
+    };
+
+    try {
+      validateJpeg(frontFile, "Front image", true);
+      validateJpeg(backFile, "Back image", false);
+    } catch (validationError) {
+      return setError(validationError.message || "Invalid image selected.");
+    }
+
+    try {
+      setIsSubmitting(true);
+      const frontUpload = await uploadSingleFile(frontFile);
+      const backUpload = backFile ? await uploadSingleFile(backFile) : null;
+
+      await createPaper({
+        ...clean,
+        imageUrl: frontUpload.url,
+        secondImageUrl: backUpload?.url,
+      });
       setSuccess("Upload submitted for admin approval.");
       setForm({
         title: "",
@@ -105,7 +146,8 @@ export function UploadPage({ onRequireAuth }) {
         type: "Midterm",
         department: "Computer Science",
       });
-      setFile(null);
+      setFrontFile(null);
+      setBackFile(null);
     } catch (uploadError) {
       setError(uploadError.message || "Upload failed.");
     } finally {
@@ -117,7 +159,7 @@ export function UploadPage({ onRequireAuth }) {
     <div className="grid gap-6 pb-16 lg:grid-cols-12 xl:pb-0">
       <section className="rounded-2xl bg-white p-6 shadow-sm lg:col-span-8">
         <h2 className="text-3xl font-extrabold tracking-tight text-slate-900">Contribute to the Archive</h2>
-        <p className="mt-2 text-sm text-slate-500">JPEG preview only, max 5MB, all uploads start as pending.</p>
+        <p className="mt-2 text-sm text-slate-500">Upload front page and optional back page (JPEG, max 5MB each). All uploads start as pending.</p>
 
         <form onSubmit={onSubmit} className="mt-6 space-y-4">
           <div className="grid gap-4 md:grid-cols-2">
@@ -178,20 +220,38 @@ export function UploadPage({ onRequireAuth }) {
             ))}
           </select>
 
-          <input
-            type="file"
-            accept="image/jpeg"
-            onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-            className="w-full rounded-xl border-none bg-slate-100 px-3 py-3 text-sm"
-            required
-          />
-
-          {filePreview ? (
-            <div className="overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
-              <div className="border-b border-slate-200 px-3 py-2 text-xs font-semibold uppercase tracking-wider text-slate-500">Image preview</div>
-              <img src={filePreview} alt="Selected upload preview" className="h-56 w-full object-cover" loading="lazy" />
+          <div className="grid gap-3 md:grid-cols-2">
+            <div className="space-y-2">
+              <label className="text-xs font-semibold uppercase tracking-wider text-slate-500">Front image (required)</label>
+              <input
+                type="file"
+                accept="image/jpeg"
+                onChange={(e) => setFrontFile(e.target.files?.[0] ?? null)}
+                className="w-full rounded-xl border-none bg-slate-100 px-3 py-3 text-sm"
+                required
+              />
+              {frontPreview ? (
+                <div className="overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
+                  <img src={frontPreview} alt="Front upload preview" className="h-56 w-full object-cover" loading="lazy" />
+                </div>
+              ) : null}
             </div>
-          ) : null}
+
+            <div className="space-y-2">
+              <label className="text-xs font-semibold uppercase tracking-wider text-slate-500">Back image (optional)</label>
+              <input
+                type="file"
+                accept="image/jpeg"
+                onChange={(e) => setBackFile(e.target.files?.[0] ?? null)}
+                className="w-full rounded-xl border-none bg-slate-100 px-3 py-3 text-sm"
+              />
+              {backPreview ? (
+                <div className="overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
+                  <img src={backPreview} alt="Back upload preview" className="h-56 w-full object-cover" loading="lazy" />
+                </div>
+              ) : null}
+            </div>
+          </div>
 
           {error ? <p className="text-sm font-semibold text-red-600">{error}</p> : null}
           {success ? <p className="text-sm font-semibold text-emerald-700">{success}</p> : null}
@@ -210,8 +270,9 @@ export function UploadPage({ onRequireAuth }) {
         <div className="rounded-2xl bg-white p-5 shadow-sm">
           <h3 className="mb-3 text-base font-bold text-slate-900">Upload Guidelines</h3>
           <ul className="space-y-2 text-sm text-slate-600">
+            <li>• Front image is required, back image is optional.</li>
             <li>• Only image/jpeg is accepted.</li>
-            <li>• Maximum file size is 5MB.</li>
+            <li>• Maximum file size is 5MB per image.</li>
             <li>• Add correct subject/teacher/year metadata.</li>
             <li>• Admin review is required before publishing.</li>
           </ul>
