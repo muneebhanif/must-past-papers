@@ -1,4 +1,5 @@
 import { useEffect, useMemo } from "react";
+import { createPortal } from "react-dom";
 
 export function ImageViewerModal({ open, onClose, images, title }) {
   const visibleImages = useMemo(() => (images ?? []).filter(Boolean), [images]);
@@ -26,44 +27,52 @@ export function ImageViewerModal({ open, onClose, images, title }) {
     return null;
   }
 
-  return (
+  if (typeof document === "undefined") {
+    return null;
+  }
+
+  return createPortal(
     <div
-      className="fixed inset-0 z-[140] flex items-center justify-center bg-slate-950/70 p-3 backdrop-blur-md md:p-6"
+      className="fixed inset-0 z-[999] bg-slate-950/75 backdrop-blur-md"
       onClick={onClose}
       role="dialog"
       aria-modal="true"
       aria-label="Image viewer"
     >
       <div
-        className="relative w-full max-w-7xl overflow-auto rounded-2xl border border-white/15 bg-black/40 p-2 shadow-2xl md:p-3"
-        style={{ maxHeight: "92vh" }}
+        className="relative h-full w-full p-2 sm:p-4"
         onClick={(event) => event.stopPropagation()}
       >
         <button
           type="button"
           onClick={onClose}
-          className="absolute right-3 top-3 z-10 rounded-full bg-black/70 px-3 py-1 text-sm font-bold text-white ring-1 ring-white/20"
+          className="absolute right-4 top-4 z-20 rounded-full bg-black/70 px-3 py-1 text-sm font-bold text-white ring-1 ring-white/20"
           aria-label="Close image viewer"
         >
           ✕
         </button>
 
-        <div className={`grid gap-2 ${visibleImages.length > 1 ? "md:grid-cols-2" : "grid-cols-1"}`}>
+        <div
+          className={`mx-auto h-full max-w-7xl overflow-auto rounded-2xl border border-white/10 bg-black/35 p-2 shadow-2xl sm:p-3 ${
+            visibleImages.length > 1 ? "grid grid-cols-1 gap-2 md:grid-cols-2" : "grid grid-cols-1"
+          }`}
+        >
           {visibleImages.map((image, index) => (
             <div
               key={`${image}-${index}`}
-              className="overflow-hidden rounded-xl bg-black/60"
+              className="flex min-h-0 items-center justify-center overflow-hidden rounded-xl bg-black/60"
             >
               <img
                 src={image}
                 alt={`${title} page ${index + 1}`}
-                className="h-auto max-h-[84vh] w-full object-contain"
+                className="h-auto max-h-[82vh] w-auto max-w-full object-contain"
                 loading="eager"
               />
             </div>
           ))}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
