@@ -106,17 +106,17 @@ export function ProfilePage() {
   };
 
   return (
-    <div className="space-y-6 pb-16 xl:pb-0">
+    <div className="space-y-6 pb-24 xl:pb-0">
       <section className="relative rounded-2xl bg-white p-4 shadow-sm">
         <div className="h-28 rounded-xl bg-gradient-to-r from-blue-100 to-indigo-100" />
-        <div className="-mt-10 flex items-end gap-4 px-4">
+        <div className="-mt-10 flex flex-wrap items-end gap-4 px-2 sm:px-4">
           <img
             src={cartoonAvatar(me?.username || me?._id)}
             alt={me?.username ?? me?.name ?? "User"}
             className="h-20 w-20 rounded-2xl border-4 border-white object-cover"
           />
-          <div className="pb-1">
-            <h2 className="text-2xl font-extrabold text-slate-900">@{me?.username ?? "set_username"}</h2>
+          <div className="min-w-0 flex-1 pb-1">
+            <h2 className="truncate text-xl font-extrabold text-slate-900 sm:text-2xl">@{me?.username ?? "set_username"}</h2>
             <p className="text-sm text-slate-500">Public profile visible by username only.</p>
           </div>
         </div>
@@ -211,7 +211,7 @@ export function ProfilePage() {
               </select>
             </div>
 
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               <button
                 type="submit"
                 disabled={paperBusy}
@@ -269,7 +269,7 @@ export function ProfilePage() {
                 />
               </button>
 
-              <div className="flex gap-2 p-4">
+              <div className="flex flex-wrap gap-2 p-4">
                 <button
                   onClick={() => setActivePreview(paper)}
                   className="rounded-lg bg-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700"

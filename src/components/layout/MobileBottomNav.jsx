@@ -4,6 +4,7 @@ import { Link, useLocation } from "react-router-dom";
 export function MobileBottomNav() {
   const location = useLocation();
   const [isDark, setIsDark] = useState(false);
+  const normalizedPath = (location.pathname || "/").replace(/\/+$/, "") || "/";
 
   useEffect(() => {
     if (typeof document === "undefined") return;
@@ -24,6 +25,13 @@ export function MobileBottomNav() {
     { to: "/profile", label: "Profile" },
   ];
 
+  const isActive = (to) => {
+    if (to === "/") {
+      return normalizedPath === "/";
+    }
+    return normalizedPath === to || normalizedPath.startsWith(`${to}/`);
+  };
+
   return (
     <nav
       className={`fixed bottom-0 left-0 right-0 z-[120] border-t px-3 py-2 pb-[calc(env(safe-area-inset-bottom)+0.5rem)] backdrop-blur-xl xl:hidden ${
@@ -40,8 +48,8 @@ export function MobileBottomNav() {
           <Link
             key={item.to}
             to={item.to}
-            className={`rounded-xl px-2 py-2 text-center text-xs font-semibold transition ${
-              location.pathname === item.to
+            className={`rounded-xl px-2 py-2.5 text-center text-xs font-semibold transition ${
+              isActive(item.to)
                 ? isDark
                   ? "bg-blue-600/25 text-blue-200"
                   : "bg-blue-100 text-blue-700"
