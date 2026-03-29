@@ -61,6 +61,7 @@ export default function App() {
               element={
                 <FeedPage
                   department={department}
+                  setDepartment={setDepartment}
                   search={search}
                   onRequireAuth={() => setAuthPromptOpen(true)}
                 />

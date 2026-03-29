@@ -15,7 +15,7 @@ export function Navbar({ search, setSearch, selectedDepartment, onOpenDepartment
               alt="must past papers logo"
               className="h-8 w-8 rounded-lg object-cover md:h-9 md:w-9"
             />
-            <span>must past papers</span>
+            <span className="uppercase">MUST PAST PAPERS</span>
           </Link>
 
           <div className="hidden lg:flex items-center rounded-xl bg-slate-100 px-3 py-2">

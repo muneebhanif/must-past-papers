@@ -85,10 +85,12 @@ export const listApproved = query({
     paginationOpts: paginationOptsValidator,
     department: v.optional(v.string()),
     search: v.optional(v.string()),
+    paperType: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const viewerUserId = await getAuthUserId(ctx);
     const searchText = normalize(args.search ?? "");
+    const selectedType = sanitizeText(args.paperType ?? "", 40);
 
     if (args.paginationOpts.numItems > 20) {
       throw new ConvexError("Too many items requested at once.");
@@ -96,6 +98,10 @@ export const listApproved = query({
 
     if (searchText.length > 100) {
       throw new ConvexError("Search text is too long.");
+    }
+
+    if (selectedType && selectedType !== "All" && !PAPER_TYPES.has(selectedType)) {
+      throw new ConvexError("Invalid paper type filter.");
     }
 
     let q;
@@ -116,6 +122,7 @@ export const listApproved = query({
     const page = await q.paginate(args.paginationOpts);
 
     const filtered = page.page.filter((paper) => {
+      if (selectedType && selectedType !== "All" && paper.type !== selectedType) return false;
       if (!searchText) return true;
       const haystack = [paper.title, paper.subject, paper.teacher, paper.year, paper.type]
         .join(" ")
@@ -139,6 +146,7 @@ export const listApproved = query({
 
       ownPendingOrRejected = ownPapers.filter((paper) => {
         if (paper.status === "approved") return false;
+        if (selectedType && selectedType !== "All" && paper.type !== selectedType) return false;
         if (args.department && args.department !== "All" && paper.department !== args.department) {
           return false;
         }

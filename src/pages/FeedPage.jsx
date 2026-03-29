@@ -1,13 +1,18 @@
 import { usePaginatedQuery } from "convex/react";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { api } from "../lib/api";
 import { LoginSplash } from "../components/feed/LoginSplash";
 import { PaperCard } from "../components/feed/PaperCard";
+import { DEPARTMENTS } from "../constants/departments";
 
-export function FeedPage({ department, search, onRequireAuth }) {
+const PAPER_TABS = ["All", "Midterm", "Terminal", "Summer", "Improve"];
+
+export function FeedPage({ department, setDepartment, search, onRequireAuth }) {
+  const [paperType, setPaperType] = useState("All");
+
   const { results, status, loadMore } = usePaginatedQuery(
     api.papers.listApproved,
-    { department, search },
+    { department, search, paperType },
     { initialNumItems: 6 },
   );
 
@@ -32,6 +37,26 @@ export function FeedPage({ department, search, onRequireAuth }) {
       <LoginSplash />
 
       <header className="rounded-xl bg-white p-4 shadow-sm">
+        <div className="mb-3">
+          <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-slate-400 md:text-xs">
+            Departments
+          </p>
+          <div className="mobile-scroll-hide flex gap-2 overflow-x-auto pb-1">
+            {DEPARTMENTS.map((item) => (
+              <button
+                key={item}
+                type="button"
+                onClick={() => setDepartment(item)}
+                className={`whitespace-nowrap rounded-full px-3 py-1 text-xs font-semibold ${
+                  department === item ? "bg-blue-100 text-blue-700" : "bg-slate-100 text-slate-600"
+                }`}
+              >
+                {item}
+              </button>
+            ))}
+          </div>
+        </div>
+
         <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-slate-400 md:text-xs">
           Faculty of Engineering / {department === "All" ? "All" : department}
         </p>
@@ -40,20 +65,17 @@ export function FeedPage({ department, search, onRequireAuth }) {
         </h1>
 
         <div className="mobile-scroll-hide mt-3 flex gap-2 overflow-x-auto pb-1">
-          {[
-            "Latest Papers",
-            "Most Popular",
-            "Midterms",
-            "Finals",
-          ].map((tab, i) => (
-            <span
+          {PAPER_TABS.map((tab) => (
+            <button
               key={tab}
-              className={`whitespace-nowrap rounded-full px-3 py-1 text-xs font-semibold ${
-                i === 0 ? "bg-blue-100 text-blue-700" : "bg-slate-100 text-slate-600"
+              type="button"
+              onClick={() => setPaperType(tab)}
+              className={`whitespace-nowrap rounded-full px-3 py-1 text-xs font-semibold transition ${
+                paperType === tab ? "bg-blue-100 text-blue-700" : "bg-slate-100 text-slate-600"
               }`}
             >
               {tab}
-            </span>
+            </button>
           ))}
         </div>
       </header>
