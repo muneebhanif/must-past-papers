@@ -7,6 +7,14 @@ import { DEPARTMENTS } from "../constants/departments";
 
 const PAPER_TABS = ["All", "Midterm", "Terminal", "Summer", "Improve"];
 
+const departmentSubtitle = (department) => {
+  if (department === "All") return "Department of CSIT and more";
+  if (department === "Computer Science" || department === "Information Technology") {
+    return "Department of CSIT";
+  }
+  return `Department of ${department}`;
+};
+
 export function FeedPage({ department, setDepartment, search, onRequireAuth }) {
   const [paperType, setPaperType] = useState("All");
 
@@ -37,28 +45,23 @@ export function FeedPage({ department, setDepartment, search, onRequireAuth }) {
       <LoginSplash />
 
       <header className="rounded-xl bg-white p-4 shadow-sm">
-        <div className="mb-3">
+        <div className="mb-4 rounded-xl bg-slate-50 p-3">
           <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-slate-400 md:text-xs">
             Departments
           </p>
-          <div className="mobile-scroll-hide flex gap-2 overflow-x-auto pb-1">
+          <select
+            value={department}
+            onChange={(e) => setDepartment(e.target.value)}
+            className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700"
+          >
             {DEPARTMENTS.map((item) => (
-              <button
-                key={item}
-                type="button"
-                onClick={() => setDepartment(item)}
-                className={`whitespace-nowrap rounded-full px-3 py-1 text-xs font-semibold ${
-                  department === item ? "bg-blue-100 text-blue-700" : "bg-slate-100 text-slate-600"
-                }`}
-              >
-                {item}
-              </button>
+              <option key={item} value={item}>{item}</option>
             ))}
-          </div>
+          </select>
         </div>
 
         <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-slate-400 md:text-xs">
-          Faculty of Engineering / {department === "All" ? "All" : department}
+          {departmentSubtitle(department)}
         </p>
         <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 md:text-5xl">
           {department === "All" ? "Academic Archive" : department}

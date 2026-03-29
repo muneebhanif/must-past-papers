@@ -2,7 +2,7 @@ import { Link, useLocation } from "react-router-dom";
 import { AuthButton } from "../auth/AuthButton";
 import mustLogo from "../../assets/must-logo.png";
 
-export function Navbar({ search, setSearch, selectedDepartment, onOpenDepartments }) {
+export function Navbar({ search, setSearch }) {
   const location = useLocation();
 
   return (
@@ -49,13 +49,6 @@ export function Navbar({ search, setSearch, selectedDepartment, onOpenDepartment
         </div>
 
         <div className="xl:hidden flex items-center gap-2">
-          <button
-            type="button"
-            onClick={onOpenDepartments}
-            className="rounded-full bg-slate-100 px-3 py-2 text-xs font-bold text-slate-700"
-          >
-            {selectedDepartment === "All" ? "Departments" : selectedDepartment}
-          </button>
           <AuthButton />
         </div>
       </div>
