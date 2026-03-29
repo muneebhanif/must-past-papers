@@ -27,3 +27,8 @@ env.example
 *.njsproj
 *.sln
 *.sw?
+
+# Agent metadata
+.agents/
+AGENTS.md
+CLAUDE.md
