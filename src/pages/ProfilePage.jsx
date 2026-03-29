@@ -116,8 +116,8 @@ export function ProfilePage() {
             className="h-20 w-20 rounded-2xl border-4 border-white object-cover"
           />
           <div className="min-w-0 flex-1 pb-1">
-            <h2 className="truncate text-xl font-extrabold text-slate-900 sm:text-2xl">@{me?.username ?? "set_username"}</h2>
-            <p className="text-sm text-slate-500">Public profile visible by username only.</p>
+            <h2 className="truncate text-xl font-extrabold text-blue-950 sm:text-2xl">@{me?.username ?? "set_username"}</h2>
+            <p className="text-sm text-blue-900/90">Public profile visible by username only.</p>
           </div>
         </div>
       </section>
@@ -272,13 +272,13 @@ export function ProfilePage() {
               <div className="flex flex-wrap gap-2 p-4">
                 <button
                   onClick={() => setActivePreview(paper)}
-                  className="rounded-lg bg-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700"
+                  className="rounded-lg bg-blue-100 px-3 py-1.5 text-xs font-semibold text-blue-900"
                 >
                   Open
                 </button>
                 <button
                   onClick={() => onEditUpload(paper)}
-                  className="rounded-lg bg-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700"
+                  className="rounded-lg bg-blue-100 px-3 py-1.5 text-xs font-semibold text-blue-900"
                 >
                   Edit
                 </button>
