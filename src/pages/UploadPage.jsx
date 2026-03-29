@@ -135,7 +135,7 @@ export function UploadPage({ onRequireAuth }) {
       await createPaper({
         ...clean,
         imageUrl: frontUpload.url,
-        secondImageUrl: backUpload?.url,
+        ...(backUpload?.url ? { secondImageUrl: backUpload.url } : {}),
       });
       setSuccess("Upload submitted for admin approval.");
       setForm({

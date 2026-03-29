@@ -214,13 +214,14 @@ export const create = mutation({
 
       const endpoint = process.env.IMAGEKIT_URL_ENDPOINT;
       if (endpoint) {
+        let endpointHost;
         try {
-          const endpointHost = new URL(endpoint).hostname;
-          if (parsedImageUrl.hostname !== endpointHost) {
-            throw new ConvexError(`${label} URL host is not allowed.`);
-          }
+          endpointHost = new URL(endpoint).hostname;
         } catch {
           throw new ConvexError("Server image host configuration is invalid.");
+        }
+        if (parsedImageUrl.hostname !== endpointHost) {
+          throw new ConvexError(`${label} URL host is not allowed.`);
         }
       }
     };
@@ -257,12 +258,9 @@ export const create = mutation({
     return ctx.db.insert("papers", {
       ...validated,
       imageUrl,
-      secondImageUrl,
+      ...(secondImageUrl ? { secondImageUrl } : {}),
       uploadedBy: user._id,
       status: "pending",
-      reviewNote: undefined,
-      reviewedAt: undefined,
-      reviewedBy: undefined,
       likeCount: 0,
       commentCount: 0,
       createdAt: now,
