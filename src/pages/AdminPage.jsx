@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from "convex/react";
+import { useAction, useMutation, useQuery } from "convex/react";
 import { useEffect, useState } from "react";
 import { api } from "../lib/api";
 import { ImageViewerModal } from "../components/common/ImageViewerModal";
@@ -8,6 +8,7 @@ export function AdminPage() {
   const login = useMutation(api.adminPanel.login);
   const logout = useMutation(api.adminPanel.logout);
   const setStatus = useMutation(api.adminPanel.setStatus);
+  const rejectPaperAndCleanup = useAction(api.imagekit.rejectPaperAndCleanup);
   const listUsersQuery = api.adminPanel.listUsers;
   const createUser = useMutation(api.adminPanel.createUser);
   const updateUser = useMutation(api.adminPanel.updateUser);
@@ -83,12 +84,20 @@ export function AdminPage() {
     const note = (reviewNoteByPaper[paperId] ?? "").trim();
     setError("");
     try {
-      await setStatus({
-        token,
-        paperId,
-        status,
-        reviewNote: status === "rejected" ? note : undefined,
-      });
+      if (status === "rejected") {
+        await rejectPaperAndCleanup({
+          token,
+          paperId,
+          reviewNote: note,
+        });
+      } else {
+        await setStatus({
+          token,
+          paperId,
+          status,
+          reviewNote: undefined,
+        });
+      }
       setReviewNoteByPaper((prev) => ({ ...prev, [paperId]: "" }));
     } catch (err) {
       setError(err?.message || "Failed to update paper status.");

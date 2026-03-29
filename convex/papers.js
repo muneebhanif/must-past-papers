@@ -191,6 +191,8 @@ export const create = mutation({
     department: v.string(),
     imageUrl: v.string(),
     secondImageUrl: v.optional(v.string()),
+    imageFileId: v.optional(v.string()),
+    secondImageFileId: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const user = await requireUser(ctx);
@@ -198,6 +200,10 @@ export const create = mutation({
     const imageUrl = sanitizeText(args.imageUrl, 600);
     const secondImageUrl = args.secondImageUrl
       ? sanitizeText(args.secondImageUrl, 600)
+      : undefined;
+    const imageFileId = args.imageFileId ? sanitizeText(args.imageFileId, 120) : undefined;
+    const secondImageFileId = args.secondImageFileId
+      ? sanitizeText(args.secondImageFileId, 120)
       : undefined;
 
     const validateImageUrl = (url, label) => {
@@ -259,6 +265,8 @@ export const create = mutation({
       ...validated,
       imageUrl,
       ...(secondImageUrl ? { secondImageUrl } : {}),
+      ...(imageFileId ? { imageFileId } : {}),
+      ...(secondImageFileId ? { secondImageFileId } : {}),
       uploadedBy: user._id,
       status: "pending",
       likeCount: 0,

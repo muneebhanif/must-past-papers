@@ -173,11 +173,34 @@ export const setStatus = mutation({
     await ctx.db.patch(args.paperId, {
       status: args.status,
       reviewNote: args.status === "rejected" ? note : undefined,
+      imageFileId: args.status === "rejected" ? undefined : paper.imageFileId,
+      secondImageFileId: args.status === "rejected" ? undefined : paper.secondImageFileId,
       reviewedAt: Date.now(),
       reviewedBy: session.email,
     });
 
     return { ok: true };
+  },
+});
+
+export const getPaperCleanupData = query({
+  args: {
+    token: v.string(),
+    paperId: v.id("papers"),
+  },
+  handler: async (ctx, args) => {
+    await requireValidSession(ctx, args.token);
+
+    const paper = await ctx.db.get(args.paperId);
+    if (!paper) {
+      throw new ConvexError("Paper not found.");
+    }
+
+    return {
+      paperId: paper._id,
+      imageFileId: paper.imageFileId,
+      secondImageFileId: paper.secondImageFileId,
+    };
   },
 });
 
@@ -356,7 +379,17 @@ export const deleteActivity = mutation({
   handler: async (ctx, args) => {
     await requireValidSession(ctx, args.token);
 
-    const [activityType, entityId] = args.activityId.split("_");
+    let activityType = "";
+    let entityId = "";
+
+    if (args.activityId.startsWith("comment_")) {
+      activityType = "comment";
+      entityId = args.activityId.slice("comment_".length);
+    } else if (args.activityId.startsWith("like_")) {
+      activityType = "like";
+      entityId = args.activityId.slice("like_".length);
+    }
+
     if (!activityType || !entityId) {
       throw new ConvexError("Invalid activity id.");
     }

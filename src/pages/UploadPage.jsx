@@ -5,6 +5,87 @@ import { ACADEMIC_YEARS, PAPER_TYPES } from "../constants/academicOptions";
 import { api } from "../lib/api";
 
 const sanitizeText = (value, max = 120) => value.trim().replace(/\s+/g, " ").slice(0, max);
+const MAX_UPLOAD_BYTES = 3 * 1024 * 1024;
+const MAX_SOURCE_BYTES = 20 * 1024 * 1024;
+
+const fileToImage = (file) =>
+  new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const image = new Image();
+    image.onload = () => {
+      URL.revokeObjectURL(url);
+      resolve(image);
+    };
+    image.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error("Could not read image file."));
+    };
+    image.src = url;
+  });
+
+const canvasToJpegBlob = (canvas, quality) =>
+  new Promise((resolve, reject) => {
+    canvas.toBlob(
+      (blob) => {
+        if (!blob) {
+          reject(new Error("Could not process image."));
+          return;
+        }
+        resolve(blob);
+      },
+      "image/jpeg",
+      quality,
+    );
+  });
+
+const compressJpegToMaxSize = async (file, label) => {
+  if (file.size <= MAX_UPLOAD_BYTES) {
+    return file;
+  }
+
+  const sourceImage = await fileToImage(file);
+  const canvas = document.createElement("canvas");
+  const context = canvas.getContext("2d");
+  if (!context) {
+    throw new Error(`Could not process ${label}.`);
+  }
+
+  let width = sourceImage.naturalWidth;
+  let height = sourceImage.naturalHeight;
+  const maxDimension = 2400;
+  if (Math.max(width, height) > maxDimension) {
+    const scale = maxDimension / Math.max(width, height);
+    width = Math.max(1, Math.floor(width * scale));
+    height = Math.max(1, Math.floor(height * scale));
+  }
+
+  let outputBlob = null;
+  for (let resizeAttempt = 0; resizeAttempt < 7; resizeAttempt += 1) {
+    canvas.width = width;
+    canvas.height = height;
+    context.clearRect(0, 0, width, height);
+    context.drawImage(sourceImage, 0, 0, width, height);
+
+    for (let quality = 0.9; quality >= 0.45; quality -= 0.08) {
+      const blob = await canvasToJpegBlob(canvas, Number(quality.toFixed(2)));
+      outputBlob = blob;
+      if (blob.size <= MAX_UPLOAD_BYTES) {
+        const safeName = file.name.replace(/\.[^.]+$/, "").replace(/\s+/g, "-");
+        return new File([blob], `${safeName || "paper"}.jpg`, { type: "image/jpeg" });
+      }
+    }
+
+    width = Math.max(1, Math.floor(width * 0.85));
+    height = Math.max(1, Math.floor(height * 0.85));
+  }
+
+  if (outputBlob && outputBlob.size <= MAX_UPLOAD_BYTES) {
+    const safeName = file.name.replace(/\.[^.]+$/, "").replace(/\s+/g, "-");
+    return new File([outputBlob], `${safeName || "paper"}.jpg`, { type: "image/jpeg" });
+  }
+
+  throw new Error(`${label} could not be compressed below 3MB. Please crop or lower quality.`);
+};
 
 export function UploadPage({ onRequireAuth }) {
   const { isAuthenticated } = useConvexAuth();
@@ -84,8 +165,8 @@ export function UploadPage({ onRequireAuth }) {
       if (selectedFile.type !== "image/jpeg") {
         throw new Error(`${label} must be image/jpeg.`);
       }
-      if (selectedFile.size > 5 * 1024 * 1024) {
-        throw new Error(`${label} size must be 5MB or less.`);
+      if (selectedFile.size > MAX_SOURCE_BYTES) {
+        throw new Error(`${label} is too large. Please select a file under 20MB.`);
       }
     };
 
@@ -129,13 +210,18 @@ export function UploadPage({ onRequireAuth }) {
 
     try {
       setIsSubmitting(true);
-      const frontUpload = await uploadSingleFile(frontFile);
-      const backUpload = backFile ? await uploadSingleFile(backFile) : null;
+      const compressedFront = await compressJpegToMaxSize(frontFile, "Front image");
+      const compressedBack = backFile ? await compressJpegToMaxSize(backFile, "Back image") : null;
+
+      const frontUpload = await uploadSingleFile(compressedFront);
+      const backUpload = compressedBack ? await uploadSingleFile(compressedBack) : null;
 
       await createPaper({
         ...clean,
         imageUrl: frontUpload.url,
+        ...(frontUpload.fileId ? { imageFileId: frontUpload.fileId } : {}),
         ...(backUpload?.url ? { secondImageUrl: backUpload.url } : {}),
+        ...(backUpload?.fileId ? { secondImageFileId: backUpload.fileId } : {}),
       });
       setSuccess("Upload submitted for admin approval.");
       setForm({
@@ -159,7 +245,7 @@ export function UploadPage({ onRequireAuth }) {
     <div className="grid gap-6 pb-16 lg:grid-cols-12 xl:pb-0">
       <section className="rounded-2xl bg-white p-6 shadow-sm lg:col-span-8">
         <h2 className="text-3xl font-extrabold tracking-tight text-slate-900">Contribute to the Archive</h2>
-        <p className="mt-2 text-sm text-slate-500">Upload front page and optional back page (JPEG, max 5MB each). All uploads start as pending.</p>
+        <p className="mt-2 text-sm text-slate-500">Upload front page and optional back page (JPEG). Files are auto-compressed to max 3MB each before upload.</p>
 
         <form onSubmit={onSubmit} className="mt-6 space-y-4">
           <div className="grid gap-4 md:grid-cols-2">
@@ -272,7 +358,7 @@ export function UploadPage({ onRequireAuth }) {
           <ul className="space-y-2 text-sm text-slate-600">
             <li>• Front image is required, back image is optional.</li>
             <li>• Only image/jpeg is accepted.</li>
-            <li>• Maximum file size is 5MB per image.</li>
+            <li>• Images are auto-compressed to 3MB max per image.</li>
             <li>• Add correct subject/teacher/year metadata.</li>
             <li>• Admin review is required before publishing.</li>
           </ul>
