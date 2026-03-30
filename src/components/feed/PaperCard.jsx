@@ -497,10 +497,10 @@ export function PaperCard({ paper, onRequireAuth, isFocused = false }) {
         </div>
 
         {/* Action Buttons */}
-        <div className="mt-4 flex items-center border-y border-slate-100 py-2">
+        <div className="mt-4 flex items-center gap-1 border-y border-slate-100 py-1.5 sm:gap-0 sm:py-2">
           <button
             onClick={handleLike}
-            className={`flex flex-1 items-center justify-center gap-2 rounded-lg py-2.5 font-semibold transition-all duration-200 ${
+            className={`flex min-w-0 flex-1 items-center justify-center gap-1.5 rounded-lg px-1 py-2 text-sm font-semibold transition-all duration-200 sm:gap-2 sm:py-2.5 sm:text-base ${
               paper.stats.likedByMe
                 ? "text-rose-500"
                 : "text-slate-600 hover:bg-slate-50"
@@ -514,22 +514,22 @@ export function PaperCard({ paper, onRequireAuth, isFocused = false }) {
             <span>{paper.stats.likedByMe ? "Liked" : "Like"}</span>
           </button>
 
-          <div className="h-6 w-px bg-slate-200" />
+          <div className="hidden h-6 w-px bg-slate-200 sm:block" />
 
           <button
             onClick={() => commentInputRef.current?.focus()}
-            className="flex flex-1 items-center justify-center gap-2 rounded-lg py-2.5 font-semibold text-slate-600 transition-colors hover:bg-slate-50"
+            className="flex min-w-0 flex-1 items-center justify-center gap-1.5 rounded-lg px-1 py-2 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-50 sm:gap-2 sm:py-2.5 sm:text-base"
           >
             <MessageCircle className="h-5 w-5" />
             <span>Comment</span>
           </button>
 
-          <div className="h-6 w-px bg-slate-200" />
+          <div className="hidden h-6 w-px bg-slate-200 sm:block" />
 
           <button
             onClick={() => void onDownload()}
             disabled={isDownloading}
-            className="flex flex-1 items-center justify-center gap-2 rounded-lg py-2.5 font-semibold text-slate-600 transition-colors hover:bg-slate-50 disabled:opacity-50"
+            className="flex min-w-0 flex-1 items-center justify-center gap-1.5 rounded-lg px-1 py-2 text-sm font-semibold text-slate-600 transition-colors hover:bg-slate-50 disabled:opacity-50 sm:gap-2 sm:py-2.5 sm:text-base"
           >
             <Download className={`h-5 w-5 ${isDownloading ? "animate-bounce" : ""}`} />
             <span>{isDownloading ? "..." : "Download"}</span>
