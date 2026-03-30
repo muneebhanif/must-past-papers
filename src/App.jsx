@@ -75,13 +75,16 @@ export default function App() {
       </main>
 
       {!isAdminRoute && !isProfileRoute ? (
-        <footer className="border-t border-slate-200 bg-[#ffffff] px-3 py-6 pb-[calc(env(safe-area-inset-bottom)+4.75rem)] text-center text-black md:border-blue-800/20 md:bg-gradient-to-br md:from-blue-700 md:via-blue-600 md:to-indigo-700 md:py-10 md:pb-10 md:text-white md:shadow-[0_-8px_30px_rgba(30,64,175,0.25)] md:px-4">
-          <p className="text-sm font-extrabold tracking-[0.14em] text-black md:text-base md:text-white/95">
+        <footer className="border-t border-slate-200 bg-white px-3 py-6 pb-[calc(env(safe-area-inset-bottom)+4.75rem)] text-center text-black md:px-4 md:py-10 md:pb-10">
+          <p className="text-sm font-extrabold tracking-[0.14em] text-black md:text-base">
             MUST PAST PAPERS BY DEPARTMENT OF CSIT
           </p>
-          <div className="mx-auto mt-4 h-px w-40 bg-slate-300 md:bg-white/30" />
-          <p className="mt-3 text-[11px] font-bold tracking-[0.1em] text-black/80 md:text-xs md:text-blue-100">
+          <div className="mx-auto mt-4 h-px w-40 bg-slate-300" />
+          <p className="mt-3 text-[11px] font-bold tracking-[0.1em] text-black/80 md:text-xs">
             © {new Date().getFullYear()} DESIGNED AND DEVELOPED BY CRUX DYNAMICS
+          </p>
+          <p className="mt-2 text-xs font-semibold text-black/80 md:text-sm">
+            Contact us: <a href="mailto:cruxdynamics@gmail.com" className="underline underline-offset-2">cruxdynamics@gmail.com</a>
           </p>
         </footer>
       ) : null}
