@@ -9,7 +9,7 @@ export const DEPARTMENTS = [
   "English Department",
   "Software Engineering",
   "Electrical Engineering",
-  "Business Admin",
+  
   "BBA",
   "Civil Engineering",
   "Mathematics",
