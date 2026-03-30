@@ -176,21 +176,13 @@ export function FeedPage({ department, setDepartment, search, setSearch, onRequi
   const myRankIndex = topThreeContributors.findIndex((item) => item.userId === me?._id);
   const myRank = myRankIndex >= 0 ? myRankIndex + 1 : null;
 
-  useEffect(() => {
-    if (!topThreeContributors.length) return;
-
-    const today = new Date().toISOString().slice(0, 10);
-    const dismissedOn = localStorage.getItem("top_contributors_popup_dismissed_on");
-
-    if (dismissedOn !== today) {
-      setShowContributorsPopup(true);
-    }
-  }, [topThreeContributors.length]);
-
   const dismissContributorsPopup = () => {
-    const today = new Date().toISOString().slice(0, 10);
-    localStorage.setItem("top_contributors_popup_dismissed_on", today);
     setShowContributorsPopup(false);
+  };
+
+  const openContributorsPopup = () => {
+    if (!topThreeContributors.length) return;
+    setShowContributorsPopup(true);
   };
 
   // Scroll to highlighted paper
@@ -224,6 +216,17 @@ export function FeedPage({ department, setDepartment, search, setSearch, onRequi
   return (
     <div className="space-y-4 pb-24 sm:space-y-6 xl:pb-0">
       <LoginSplash />
+
+      {topThreeContributors.length ? (
+        <button
+          type="button"
+          onClick={openContributorsPopup}
+          className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-2 text-xs font-bold text-blue-700 shadow-sm ring-1 ring-slate-200 active:scale-95 sm:text-sm"
+        >
+          <Trophy className="h-4 w-4" />
+          Top Contributors
+        </button>
+      ) : null}
 
       {/* ============================================================ */}
       {/*  HEADER                                                      */}
