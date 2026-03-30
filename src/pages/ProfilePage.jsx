@@ -117,7 +117,7 @@ export function ProfilePage() {
           />
           <div className="min-w-0 flex-1 pb-1">
             <h2 className="truncate text-xl font-extrabold text-blue-950 sm:text-2xl">@{me?.username ?? "set_username"}</h2>
-            <p className="text-sm text-blue-900/90">Public profile visible by username only.</p>
+            <p className="text-sm text-slate-600">Public profile visible by username only.</p>
           </div>
         </div>
       </section>
