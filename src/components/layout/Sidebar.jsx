@@ -80,17 +80,17 @@ export function Sidebar({ selectedDepartment, setDepartment }) {
     <aside className="hidden w-72 shrink-0 xl:block">
       <div className="sticky top-20 space-y-2">
         {/* Header Card */}
-        <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm dark:border-slate-700 dark:bg-[#0b1733]">
+        <div className="sidebar-shell overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm dark:border-slate-700 dark:bg-[#0b1733]">
           {/* Top Section */}
-          <div className="border-b border-slate-100 bg-gradient-to-br from-slate-50 to-white p-5 dark:border-slate-700 dark:from-[#0f2149] dark:to-[#0b1733]">
+          <div className="sidebar-header border-b border-slate-100 bg-gradient-to-br from-slate-50 to-white p-5 dark:border-slate-700 dark:from-[#0f2149] dark:to-[#0b1733]">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 shadow-md shadow-blue-500/20">
                   <GraduationCap className="h-5 w-5 text-white" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">Departments</h3>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">{totalCount} available</p>
+                  <h3 className="sidebar-title text-sm font-bold text-slate-900 dark:text-slate-100">Departments</h3>
+                  <p className="sidebar-subtitle text-xs text-slate-500 dark:text-slate-400">{totalCount} available</p>
                 </div>
               </div>
               <button
@@ -115,7 +115,7 @@ export function Sidebar({ selectedDepartment, setDepartment }) {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder='Search departments ( / )'
-                  className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-9 text-sm text-slate-700 transition-all placeholder:text-slate-400 focus:border-blue-300 focus:outline-none focus:ring-4 focus:ring-blue-50 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:border-blue-500 dark:focus:ring-blue-500/20"
+                  className="sidebar-search w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-9 text-sm text-slate-700 transition-all placeholder:text-slate-400 focus:border-blue-300 focus:outline-none focus:ring-4 focus:ring-blue-50 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:border-blue-500 dark:focus:ring-blue-500/20"
                 />
                 {searchQuery && (
                   <button
@@ -179,9 +179,9 @@ export function Sidebar({ selectedDepartment, setDepartment }) {
                       <button
                         key={department}
                         onClick={() => setDepartment(department)}
-                        className={`group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-all duration-200 ${
+                        className={`department-item group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-all duration-200 ${
                           isActive
-                            ? "bg-blue-600 text-white shadow-md shadow-blue-600/20"
+                            ? "department-item-active bg-blue-600 text-white shadow-md shadow-blue-600/20"
                             : "text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800/80"
                         }`}
                       >
@@ -203,7 +203,7 @@ export function Sidebar({ selectedDepartment, setDepartment }) {
                         {/* Department Name */}
                         <div className="min-w-0 flex-1">
                           <p
-                            className={`truncate text-sm font-semibold ${
+                            className={`department-name truncate text-sm font-semibold ${
                               isActive ? "text-white" : "text-slate-800 dark:text-slate-100"
                             }`}
                           >
@@ -327,6 +327,35 @@ export function Sidebar({ selectedDepartment, setDepartment }) {
         }
         .dark .custom-scrollbar {
           scrollbar-color: #334155 transparent;
+        }
+
+        html.dark .sidebar-shell {
+          background-color: #0b1733 !important;
+          border-color: #94a3b8 !important;
+        }
+        html.dark .sidebar-header {
+          background: linear-gradient(to bottom right, #122650, #0b1733) !important;
+          border-color: #334155 !important;
+        }
+        html.dark .sidebar-title {
+          color: #f8fafc !important;
+        }
+        html.dark .sidebar-subtitle {
+          color: #94a3b8 !important;
+        }
+        html.dark .sidebar-search {
+          background-color: #0f1f44 !important;
+          border-color: #334155 !important;
+          color: #f1f5f9 !important;
+        }
+        html.dark .sidebar-search::placeholder {
+          color: #94a3b8 !important;
+        }
+        html.dark .department-item:not(.department-item-active):hover {
+          background-color: #1e293b !important;
+        }
+        html.dark .department-item:not(.department-item-active):hover .department-name {
+          color: #f8fafc !important;
         }
       `}</style>
     </aside>
