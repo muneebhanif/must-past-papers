@@ -383,7 +383,7 @@ export function PaperCard({ paper, onRequireAuth, isFocused = false }) {
 
       {/* Image Section */}
       {secondPreviewUrl ? (
-        <div className="grid h-[22rem] w-full grid-cols-2 gap-0.5 overflow-hidden bg-slate-100 md:h-[30rem] lg:h-[36rem]">
+        <div className="grid h-[24rem] w-full grid-cols-2 gap-0.5 overflow-hidden bg-slate-100 md:h-[32rem] lg:h-[38rem]">
           <button
             type="button"
             onClick={() => openViewer([safePreviewUrl])}
@@ -444,7 +444,7 @@ export function PaperCard({ paper, onRequireAuth, isFocused = false }) {
         <button
           type="button"
           onClick={() => openViewer([safePreviewUrl])}
-          className="group/img relative h-[22rem] w-full overflow-hidden bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-500 md:h-[30rem] lg:h-[36rem]"
+          className="group/img relative h-[24rem] w-full overflow-hidden bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-500 md:h-[32rem] lg:h-[38rem]"
           aria-label="Open paper"
         >
           {!imageLoaded && <ImageSkeleton />}
