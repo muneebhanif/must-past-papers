@@ -240,14 +240,14 @@ export function PaperCard({ paper, onRequireAuth, isFocused = false }) {
   return (
     <article
       data-paper-id={paper._id}
-      className={`group relative overflow-hidden rounded-2xl border bg-white shadow-sm transition-all duration-300 hover:shadow-xl ${
+      className={`group relative -mx-3 overflow-hidden rounded-none border-x-0 border-y border-slate-200/80 bg-white shadow-sm transition-all duration-300 hover:shadow-xl sm:mx-0 sm:rounded-2xl sm:border ${
         isFocused
-          ? "border-blue-400 ring-4 ring-blue-100"
-          : "border-slate-200/80 hover:border-slate-300"
+          ? "border-blue-400 sm:ring-4 sm:ring-blue-100"
+          : "hover:border-slate-300"
       }`}
     >
       {/* Header */}
-      <div className="relative p-5 pb-4 md:p-6 md:pb-4">
+      <div className="relative p-4 pb-3 md:p-6 md:pb-4">
         <div className="flex items-start justify-between gap-4">
           {/* User Info */}
           <div className="flex items-center gap-3">
@@ -465,7 +465,7 @@ export function PaperCard({ paper, onRequireAuth, isFocused = false }) {
       )}
 
       {/* Actions & Comments Section */}
-      <div className="p-5 md:p-6">
+      <div className="p-4 md:p-6">
         {/* Stats Bar */}
         <div className="flex items-center justify-between text-sm">
           <div className="flex items-center gap-4">
