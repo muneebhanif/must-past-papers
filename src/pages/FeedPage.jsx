@@ -8,12 +8,10 @@ import { DEPARTMENTS } from "../constants/departments";
 import { SEMESTERS } from "../constants/academicOptions";
 import {
   Search,
-  Filter,
   ChevronDown,
   BookOpen,
   GraduationCap,
   FileText,
-  Loader2,
   FolderOpen,
   Sparkles,
   TrendingUp,
@@ -22,19 +20,19 @@ import {
   X,
   SlidersHorizontal,
   LayoutGrid,
-  List
+  List,
 } from "lucide-react";
 
 const PAPER_TABS = [
-  { id: "All", label: "All Papers", icon: FileText },
-  { id: "Midterm", label: "Midterm", icon: Clock },
-  { id: "Terminal", label: "Terminal", icon: CheckCircle2 },
-  { id: "Summer", label: "Summer", icon: Sparkles },
-  { id: "Improve", label: "Improvement", icon: TrendingUp },
+  { id: "All", label: "All", mobileLabel: "All", icon: FileText },
+  { id: "Midterm", label: "Midterm", mobileLabel: "Mid", icon: Clock },
+  { id: "Terminal", label: "Terminal", mobileLabel: "Term", icon: CheckCircle2 },
+  { id: "Summer", label: "Summer", mobileLabel: "Sum", icon: Sparkles },
+  { id: "Improve", label: "Improve", mobileLabel: "Imp", icon: TrendingUp },
 ];
 
 const departmentConfig = {
-  "All": {
+  All: {
     subtitle: "Explore All Departments",
     description: "Browse papers from Computer Science, IT, and more",
     gradient: "from-blue-600 via-indigo-600 to-purple-600",
@@ -54,36 +52,39 @@ const departmentConfig = {
   },
 };
 
-const getConfig = (department) => departmentConfig[department] || {
-  subtitle: `Department of ${department}`,
-  description: `${department} exam papers and resources`,
-  gradient: "from-slate-600 via-gray-600 to-zinc-600",
-  bgPattern: "bg-gradient-to-br from-slate-50 via-gray-50 to-zinc-50",
-};
+const getConfig = (department) =>
+  departmentConfig[department] || {
+    subtitle: `Department of ${department}`,
+    description: `${department} exam papers and resources`,
+    gradient: "from-slate-600 via-gray-600 to-zinc-600",
+    bgPattern: "bg-gradient-to-br from-slate-50 via-gray-50 to-zinc-50",
+  };
 
-// Loading skeleton for paper cards
+/* ------------------------------------------------------------------ */
+/*  Skeleton                                                          */
+/* ------------------------------------------------------------------ */
 const PaperCardSkeleton = () => (
   <div className="animate-pulse overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-    <div className="p-5 md:p-6">
+    <div className="p-4 md:p-6">
       <div className="flex items-center gap-3">
-        <div className="h-11 w-11 rounded-full bg-slate-200" />
+        <div className="h-10 w-10 rounded-full bg-slate-200 md:h-11 md:w-11" />
         <div className="space-y-2">
           <div className="h-4 w-24 rounded bg-slate-200" />
           <div className="h-3 w-16 rounded bg-slate-200" />
         </div>
       </div>
       <div className="mt-4 space-y-2">
-        <div className="h-6 w-3/4 rounded bg-slate-200" />
+        <div className="h-5 w-3/4 rounded bg-slate-200 md:h-6" />
         <div className="h-4 w-1/2 rounded bg-slate-200" />
       </div>
-      <div className="mt-4 flex gap-2">
+      <div className="mt-3 flex gap-2">
         <div className="h-6 w-20 rounded-full bg-slate-200" />
         <div className="h-6 w-16 rounded-full bg-slate-200" />
       </div>
     </div>
-    <div className="h-[22rem] w-full bg-slate-100 md:h-[30rem]" />
-    <div className="p-5 md:p-6">
-      <div className="flex gap-4">
+    <div className="h-64 w-full bg-slate-100 sm:h-80 md:h-[30rem]" />
+    <div className="p-4 md:p-6">
+      <div className="flex gap-3">
         <div className="h-10 flex-1 rounded-lg bg-slate-200" />
         <div className="h-10 flex-1 rounded-lg bg-slate-200" />
         <div className="h-10 flex-1 rounded-lg bg-slate-200" />
@@ -92,21 +93,22 @@ const PaperCardSkeleton = () => (
   </div>
 );
 
-// Empty state component
+/* ------------------------------------------------------------------ */
+/*  Empty state                                                       */
+/* ------------------------------------------------------------------ */
 const EmptyState = ({ search, department, onClear }) => (
-  <div className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm md:p-12">
-    {/* Background decoration */}
+  <div className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 text-center shadow-sm sm:p-8 md:p-12">
     <div className="absolute inset-0 opacity-50">
-      <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-gradient-to-br from-blue-100 to-indigo-100" />
-      <div className="absolute -bottom-20 -left-20 h-64 w-64 rounded-full bg-gradient-to-br from-purple-100 to-pink-100" />
+      <div className="absolute -right-20 -top-20 h-48 w-48 rounded-full bg-gradient-to-br from-blue-100 to-indigo-100 md:h-64 md:w-64" />
+      <div className="absolute -bottom-20 -left-20 h-48 w-48 rounded-full bg-gradient-to-br from-purple-100 to-pink-100 md:h-64 md:w-64" />
     </div>
 
     <div className="relative">
-      <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200">
-        <FolderOpen className="h-10 w-10 text-slate-400" />
+      <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 md:mb-6 md:h-20 md:w-20">
+        <FolderOpen className="h-8 w-8 text-slate-400 md:h-10 md:w-10" />
       </div>
 
-      <h3 className="text-xl font-bold text-slate-900">No papers found</h3>
+      <h3 className="text-lg font-bold text-slate-900 md:text-xl">No papers found</h3>
       <p className="mx-auto mt-2 max-w-md text-sm text-slate-500">
         {search
           ? `We couldn't find any papers matching "${search}" in ${department === "All" ? "any department" : department}.`
@@ -116,7 +118,7 @@ const EmptyState = ({ search, department, onClear }) => (
       {search && (
         <button
           onClick={onClear}
-          className="mt-6 inline-flex items-center gap-2 rounded-full bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white transition-all hover:bg-slate-800"
+          className="mt-5 inline-flex items-center gap-2 rounded-full bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white active:scale-95"
         >
           <X className="h-4 w-4" />
           Clear search
@@ -126,27 +128,33 @@ const EmptyState = ({ search, department, onClear }) => (
   </div>
 );
 
-// Filter pill component
+/* ------------------------------------------------------------------ */
+/*  Filter pill                                                       */
+/* ------------------------------------------------------------------ */
 const FilterPill = ({ label, value, onClear }) => (
   <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700">
     {label}: {value}
     <button
       onClick={onClear}
-      className="rounded-full p-0.5 transition-colors hover:bg-blue-200"
+      className="rounded-full p-0.5 active:bg-blue-200"
     >
       <X className="h-3 w-3" />
     </button>
   </span>
 );
 
+/* ------------------------------------------------------------------ */
+/*  Main FeedPage                                                     */
+/* ------------------------------------------------------------------ */
 export function FeedPage({ department, setDepartment, search, setSearch, onRequireAuth }) {
   const [paperType, setPaperType] = useState("All");
   const [semester, setSemester] = useState("All");
   const [showFilters, setShowFilters] = useState(false);
-  const [viewMode, setViewMode] = useState("feed"); // 'feed' or 'grid'
+  const [viewMode, setViewMode] = useState("feed");
   const location = useLocation();
   const highlightedPaperId = new URLSearchParams(location.search).get("paper") || "";
   const searchInputRef = useRef(null);
+  const tabScrollRef = useRef(null);
 
   const config = getConfig(department);
 
@@ -168,12 +176,17 @@ export function FeedPage({ department, setDepartment, search, setSearch, onRequi
     }, 100);
   }, [highlightedPaperId, displayedPapers]);
 
+  // Scroll active tab into view on mobile
+  useEffect(() => {
+    if (!tabScrollRef.current) return;
+    const activeBtn = tabScrollRef.current.querySelector("[data-active-tab]");
+    if (activeBtn) {
+      activeBtn.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+    }
+  }, [paperType]);
+
   const hasActiveFilters = paperType !== "All" || semester !== "All" || search;
-  const activeFilterCount = [
-    paperType !== "All",
-    semester !== "All",
-    search,
-  ].filter(Boolean).length;
+  const activeFilterCount = [paperType !== "All", semester !== "All", search].filter(Boolean).length;
 
   const clearAllFilters = () => {
     setPaperType("All");
@@ -182,54 +195,58 @@ export function FeedPage({ department, setDepartment, search, setSearch, onRequi
   };
 
   return (
-    <div className="space-y-6 pb-20 xl:pb-0">
-      {/* Login Splash */}
+    <div className="space-y-4 pb-24 sm:space-y-6 xl:pb-0">
       <LoginSplash />
 
-      {/* Hero Header */}
-      <header className="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm">
-        {/* Background Pattern */}
+      {/* ============================================================ */}
+      {/*  HEADER                                                      */}
+      {/* ============================================================ */}
+      <header className="relative overflow-hidden rounded-xl border border-slate-200/80 bg-white shadow-sm sm:rounded-2xl">
+        {/* Background layers */}
         <div className={`absolute inset-0 ${config.bgPattern} opacity-60`} />
         <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg%20width%3D%2260%22%20height%3D%2260%22%20viewBox%3D%220%200%2060%2060%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cg%20fill%3D%22none%22%20fill-rule%3D%22evenodd%22%3E%3Cg%20fill%3D%22%239C92AC%22%20fill-opacity%3D%220.03%22%3E%3Cpath%20d%3D%22M36%2034v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6%2034v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6%204V0H4v4H0v2h4v4h2V6h4V4H6z%22%2F%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E')] opacity-50" />
 
-        <div className="relative p-6 md:p-8">
-          {/* Mobile Department Selector */}
-          <div className="mb-6 xl:hidden">
-            <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-slate-500">
-              Select Department
+        <div className="relative p-4 sm:p-6 md:p-8">
+          {/* ---- Mobile Department Selector ---- */}
+          <div className="mb-4 sm:mb-6 xl:hidden">
+            <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-slate-500 sm:text-xs">
+              Department
             </label>
             <div className="relative">
+              <GraduationCap className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
               <select
                 value={department}
                 onChange={(e) => setDepartment(e.target.value)}
-                className="w-full appearance-none rounded-xl border border-slate-200 bg-white px-4 py-3 pr-10 text-sm font-semibold text-slate-700 shadow-sm transition-all focus:border-blue-300 focus:outline-none focus:ring-4 focus:ring-blue-50"
+                className="w-full appearance-none rounded-xl border border-slate-200 bg-white py-3 pl-10 pr-10 text-sm font-semibold text-slate-700 shadow-sm transition-all focus:border-blue-300 focus:outline-none focus:ring-4 focus:ring-blue-50"
               >
                 {DEPARTMENTS.map((item) => (
-                  <option key={item} value={item}>{item}</option>
+                  <option key={item} value={item}>
+                    {item}
+                  </option>
                 ))}
               </select>
               <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
             </div>
           </div>
 
-          {/* Title Section */}
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-white/80 px-3 py-1 text-xs font-semibold text-slate-600 shadow-sm backdrop-blur-sm">
-                <GraduationCap className="h-3.5 w-3.5" />
+          {/* ---- Title ---- */}
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <div className="mb-1.5 inline-flex items-center gap-1.5 rounded-full bg-white/80 px-2.5 py-0.5 text-[11px] font-semibold text-slate-600 shadow-sm backdrop-blur-sm sm:mb-2 sm:px-3 sm:py-1 sm:text-xs">
+                <GraduationCap className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                 {config.subtitle}
               </div>
-              <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 md:text-4xl lg:text-5xl">
+              <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl md:text-4xl lg:text-5xl">
                 <span className={`bg-gradient-to-r ${config.gradient} bg-clip-text text-transparent`}>
                   {department === "All" ? "Academic Archive" : department}
                 </span>
               </h1>
-              <p className="mt-2 text-sm text-slate-600 md:text-base">
+              <p className="mt-1 text-xs text-slate-600 sm:mt-2 sm:text-sm md:text-base">
                 {config.description}
               </p>
             </div>
 
-            {/* Stats */}
+            {/* Stats — hidden on small screens */}
             <div className="hidden flex-shrink-0 items-center gap-2 rounded-xl bg-white/80 px-4 py-3 shadow-sm backdrop-blur-sm md:flex">
               <BookOpen className="h-5 w-5 text-blue-600" />
               <div>
@@ -239,52 +256,54 @@ export function FeedPage({ department, setDepartment, search, setSearch, onRequi
             </div>
           </div>
 
-          {/* Search & Filters Bar */}
-          <div className="mt-6 space-y-4">
-            {/* Search Input */}
+          {/* ---- Search & Filters ---- */}
+          <div className="mt-4 space-y-3 sm:mt-6 sm:space-y-4">
+            {/* Search */}
             <div className="relative">
-              <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
-                <Search className="h-5 w-5 text-slate-400" />
-              </div>
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 sm:left-4 sm:h-5 sm:w-5" />
               <input
                 ref={searchInputRef}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder={`Search papers in ${department === "All" ? "all departments" : department}...`}
-                className="w-full rounded-xl border border-slate-200 bg-white py-3.5 pl-12 pr-4 text-sm text-slate-700 shadow-sm transition-all placeholder:text-slate-400 focus:border-blue-300 focus:outline-none focus:ring-4 focus:ring-blue-50"
+                placeholder={`Search in ${department === "All" ? "all departments" : department}…`}
+                className="w-full rounded-xl border border-slate-200 bg-white py-3 pl-10 pr-10 text-sm text-slate-700 shadow-sm transition-all placeholder:text-slate-400 focus:border-blue-300 focus:outline-none focus:ring-4 focus:ring-blue-50 sm:py-3.5 sm:pl-12 sm:pr-4"
               />
               {search && (
                 <button
                   onClick={() => setSearch("")}
-                  className="absolute inset-y-0 right-0 flex items-center pr-4"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1 active:bg-slate-100"
                 >
-                  <X className="h-5 w-5 text-slate-400 transition-colors hover:text-slate-600" />
+                  <X className="h-4 w-4 text-slate-400" />
                 </button>
               )}
             </div>
 
-            {/* Filter Controls */}
-            <div className="flex flex-wrap items-center gap-3">
-              {/* Filter Toggle Button */}
+            {/* ---- Filter row ---- */}
+            <div className="flex items-center gap-2 sm:gap-3">
+              {/* Filter toggle */}
               <button
                 onClick={() => setShowFilters(!showFilters)}
-                className={`inline-flex items-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-semibold transition-all ${
+                className={`inline-flex flex-shrink-0 items-center gap-1.5 rounded-xl border px-3 py-2 text-xs font-semibold transition-all active:scale-95 sm:gap-2 sm:px-4 sm:py-2.5 sm:text-sm ${
                   showFilters || hasActiveFilters
                     ? "border-blue-200 bg-blue-50 text-blue-700"
-                    : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50"
+                    : "border-slate-200 bg-white text-slate-600"
                 }`}
               >
-                <SlidersHorizontal className="h-4 w-4" />
-                Filters
+                <SlidersHorizontal className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                <span className="hidden sm:inline">Filters</span>
                 {activeFilterCount > 0 && (
-                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-600 text-xs text-white">
+                  <span className="flex h-4 w-4 items-center justify-center rounded-full bg-blue-600 text-[10px] text-white sm:h-5 sm:w-5 sm:text-xs">
                     {activeFilterCount}
                   </span>
                 )}
               </button>
 
-              {/* Paper Type Tabs */}
-              <div className="mobile-scroll-hide flex flex-1 gap-2 overflow-x-auto">
+              {/* Paper type tabs — horizontal scroll */}
+              <div
+                ref={tabScrollRef}
+                className="flex flex-1 gap-1.5 overflow-x-auto scrollbar-none sm:gap-2"
+                style={{ WebkitOverflowScrolling: "touch" }}
+              >
                 {PAPER_TABS.map((tab) => {
                   const Icon = tab.icon;
                   const isActive = paperType === tab.id;
@@ -292,28 +311,29 @@ export function FeedPage({ department, setDepartment, search, setSearch, onRequi
                     <button
                       key={tab.id}
                       type="button"
+                      {...(isActive ? { "data-active-tab": true } : {})}
                       onClick={() => setPaperType(tab.id)}
-                      className={`inline-flex flex-shrink-0 items-center gap-2 whitespace-nowrap rounded-xl px-4 py-2.5 text-sm font-semibold transition-all ${
+                      className={`inline-flex flex-shrink-0 items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-semibold transition-all active:scale-95 sm:gap-2 sm:rounded-xl sm:px-4 sm:py-2.5 sm:text-sm ${
                         isActive
                           ? "bg-slate-900 text-white shadow-md"
-                          : "bg-white text-slate-600 shadow-sm ring-1 ring-slate-200 hover:bg-slate-50"
+                          : "bg-white text-slate-600 shadow-sm ring-1 ring-slate-200"
                       }`}
                     >
-                      <Icon className={`h-4 w-4 ${isActive ? "text-white" : "text-slate-400"}`} />
-                      {tab.label}
+                      <Icon className={`h-3.5 w-3.5 sm:h-4 sm:w-4 ${isActive ? "text-white" : "text-slate-400"}`} />
+                      {/* Short label on mobile, full on sm+ */}
+                      <span className="sm:hidden">{tab.mobileLabel}</span>
+                      <span className="hidden sm:inline">{tab.label}</span>
                     </button>
                   );
                 })}
               </div>
 
-              {/* View Mode Toggle */}
+              {/* View mode — desktop only */}
               <div className="hidden items-center gap-1 rounded-lg bg-slate-100 p-1 md:flex">
                 <button
                   onClick={() => setViewMode("feed")}
                   className={`rounded-md p-2 transition-all ${
-                    viewMode === "feed"
-                      ? "bg-white text-slate-900 shadow-sm"
-                      : "text-slate-500 hover:text-slate-700"
+                    viewMode === "feed" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500"
                   }`}
                 >
                   <List className="h-4 w-4" />
@@ -321,9 +341,7 @@ export function FeedPage({ department, setDepartment, search, setSearch, onRequi
                 <button
                   onClick={() => setViewMode("grid")}
                   className={`rounded-md p-2 transition-all ${
-                    viewMode === "grid"
-                      ? "bg-white text-slate-900 shadow-sm"
-                      : "text-slate-500 hover:text-slate-700"
+                    viewMode === "grid" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500"
                   }`}
                 >
                   <LayoutGrid className="h-4 w-4" />
@@ -331,30 +349,56 @@ export function FeedPage({ department, setDepartment, search, setSearch, onRequi
               </div>
             </div>
 
-            {/* Expandable Filter Panel */}
+            {/* ---- Active filters (mobile-friendly pills) ---- */}
+            {hasActiveFilters && !showFilters && (
+              <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                {paperType !== "All" && (
+                  <FilterPill label="Type" value={paperType} onClear={() => setPaperType("All")} />
+                )}
+                {semester !== "All" && (
+                  <FilterPill label="Sem" value={semester} onClear={() => setSemester("All")} />
+                )}
+                {search && (
+                  <FilterPill
+                    label="Search"
+                    value={search.length > 12 ? `${search.slice(0, 12)}…` : search}
+                    onClear={() => setSearch("")}
+                  />
+                )}
+                <button
+                  onClick={clearAllFilters}
+                  className="text-xs font-semibold text-slate-400 active:text-slate-600"
+                >
+                  Clear all
+                </button>
+              </div>
+            )}
+
+            {/* ---- Expandable filter panel ---- */}
             <div
               className={`grid transition-all duration-300 ${
                 showFilters ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
               }`}
             >
               <div className="overflow-hidden">
-                <div className="rounded-xl border border-slate-200 bg-slate-50/50 p-4">
-                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                    {/* Semester Filter */}
+                <div className="rounded-xl border border-slate-200 bg-slate-50/50 p-3 sm:p-4">
+                  {/* On mobile: stack, on md+: 2 or 3 cols */}
+                  <div className="grid gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
+                    {/* Semester */}
                     <div>
-                      <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-slate-500">
+                      <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-slate-500 sm:text-xs">
                         Semester
                       </label>
                       <div className="relative">
                         <select
                           value={semester}
                           onChange={(e) => setSemester(e.target.value)}
-                          className="w-full appearance-none rounded-lg border border-slate-200 bg-white px-4 py-2.5 pr-10 text-sm font-medium text-slate-700 transition-all focus:border-blue-300 focus:outline-none focus:ring-4 focus:ring-blue-50"
+                          className="w-full appearance-none rounded-lg border border-slate-200 bg-white px-3 py-2.5 pr-10 text-sm font-medium text-slate-700 focus:border-blue-300 focus:outline-none focus:ring-4 focus:ring-blue-50"
                         >
                           <option value="All">All Semesters</option>
-                          {SEMESTERS.map((semesterOption) => (
-                            <option key={semesterOption} value={semesterOption}>
-                              Semester {semesterOption}
+                          {SEMESTERS.map((s) => (
+                            <option key={s} value={s}>
+                              Semester {s}
                             </option>
                           ))}
                         </select>
@@ -362,15 +406,13 @@ export function FeedPage({ department, setDepartment, search, setSearch, onRequi
                       </div>
                     </div>
 
-                    {/* Year Filter (placeholder) */}
+                    {/* Year */}
                     <div>
-                      <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-slate-500">
+                      <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-slate-500 sm:text-xs">
                         Year
                       </label>
                       <div className="relative">
-                        <select
-                          className="w-full appearance-none rounded-lg border border-slate-200 bg-white px-4 py-2.5 pr-10 text-sm font-medium text-slate-700 transition-all focus:border-blue-300 focus:outline-none focus:ring-4 focus:ring-blue-50"
-                        >
+                        <select className="w-full appearance-none rounded-lg border border-slate-200 bg-white px-3 py-2.5 pr-10 text-sm font-medium text-slate-700 focus:border-blue-300 focus:outline-none focus:ring-4 focus:ring-blue-50">
                           <option>All Years</option>
                           <option>2024</option>
                           <option>2023</option>
@@ -380,15 +422,13 @@ export function FeedPage({ department, setDepartment, search, setSearch, onRequi
                       </div>
                     </div>
 
-                    {/* Subject Filter (placeholder) */}
-                    <div>
-                      <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-slate-500">
+                    {/* Subject */}
+                    <div className="sm:col-span-2 lg:col-span-1">
+                      <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-slate-500 sm:text-xs">
                         Subject
                       </label>
                       <div className="relative">
-                        <select
-                          className="w-full appearance-none rounded-lg border border-slate-200 bg-white px-4 py-2.5 pr-10 text-sm font-medium text-slate-700 transition-all focus:border-blue-300 focus:outline-none focus:ring-4 focus:ring-blue-50"
-                        >
+                        <select className="w-full appearance-none rounded-lg border border-slate-200 bg-white px-3 py-2.5 pr-10 text-sm font-medium text-slate-700 focus:border-blue-300 focus:outline-none focus:ring-4 focus:ring-blue-50">
                           <option>All Subjects</option>
                         </select>
                         <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
@@ -396,35 +436,27 @@ export function FeedPage({ department, setDepartment, search, setSearch, onRequi
                     </div>
                   </div>
 
-                  {/* Clear Filters */}
+                  {/* Clear filters row */}
                   {hasActiveFilters && (
-                    <div className="mt-4 flex items-center justify-between border-t border-slate-200 pt-4">
-                      <div className="flex flex-wrap gap-2">
+                    <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-slate-200 pt-3 sm:mt-4 sm:pt-4">
+                      <div className="flex flex-wrap gap-1.5 sm:gap-2">
                         {paperType !== "All" && (
-                          <FilterPill
-                            label="Type"
-                            value={paperType}
-                            onClear={() => setPaperType("All")}
-                          />
+                          <FilterPill label="Type" value={paperType} onClear={() => setPaperType("All")} />
                         )}
                         {semester !== "All" && (
-                          <FilterPill
-                            label="Semester"
-                            value={semester}
-                            onClear={() => setSemester("All")}
-                          />
+                          <FilterPill label="Semester" value={semester} onClear={() => setSemester("All")} />
                         )}
                         {search && (
                           <FilterPill
                             label="Search"
-                            value={search.length > 15 ? `${search.slice(0, 15)}...` : search}
+                            value={search.length > 15 ? `${search.slice(0, 15)}…` : search}
                             onClear={() => setSearch("")}
                           />
                         )}
                       </div>
                       <button
                         onClick={clearAllFilters}
-                        className="text-sm font-semibold text-slate-500 transition-colors hover:text-slate-700"
+                        className="text-xs font-semibold text-slate-500 active:text-slate-700 sm:text-sm"
                       >
                         Clear all
                       </button>
@@ -437,36 +469,31 @@ export function FeedPage({ department, setDepartment, search, setSearch, onRequi
         </div>
       </header>
 
-      {/* Results Count */}
+      {/* ============================================================ */}
+      {/*  RESULTS COUNT                                               */}
+      {/* ============================================================ */}
       {displayedPapers.length > 0 && (
-        <div className="flex items-center justify-between">
-          <p className="text-sm text-slate-500">
-            Showing <span className="font-semibold text-slate-700">{displayedPapers.length}</span> papers
-            {hasActiveFilters && " with applied filters"}
+        <div className="px-1">
+          <p className="text-xs text-slate-500 sm:text-sm">
+            Showing{" "}
+            <span className="font-semibold text-slate-700">{displayedPapers.length}</span> papers
+            {hasActiveFilters && " with filters"}
           </p>
         </div>
       )}
 
-      {/* Papers Grid/Feed */}
+      {/* ============================================================ */}
+      {/*  PAPER CARDS                                                 */}
+      {/* ============================================================ */}
       {status === "LoadingFirstPage" ? (
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           <PaperCardSkeleton />
           <PaperCardSkeleton />
         </div>
       ) : displayedPapers.length === 0 ? (
-        <EmptyState
-          search={search}
-          department={department}
-          onClear={() => setSearch("")}
-        />
+        <EmptyState search={search} department={department} onClear={() => setSearch("")} />
       ) : (
-        <div
-          className={
-            viewMode === "grid"
-              ? "grid gap-6 md:grid-cols-2"
-              : "space-y-6"
-          }
-        >
+        <div className={viewMode === "grid" ? "grid gap-4 sm:gap-6 md:grid-cols-2" : "space-y-4 sm:space-y-6"}>
           {displayedPapers.map((paper) => (
             <PaperCard
               key={paper._id}
@@ -478,18 +505,29 @@ export function FeedPage({ department, setDepartment, search, setSearch, onRequi
         </div>
       )}
 
-      
-
-      {/* Floating Action - Back to Top */}
+      {/* ============================================================ */}
+      {/*  BACK-TO-TOP (above bottom nav on mobile)                    */}
+      {/* ============================================================ */}
       <button
         onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-        className="fixed bottom-24 right-4 z-40 flex h-12 w-12 items-center justify-center rounded-full bg-slate-900 text-white shadow-lg transition-all hover:bg-slate-800 hover:shadow-xl xl:bottom-8"
+        className="fixed bottom-[5.5rem] right-3 z-40 flex h-10 w-10 items-center justify-center rounded-full bg-slate-900/90 text-white shadow-lg backdrop-blur-sm transition-all active:scale-90 sm:bottom-28 sm:right-4 sm:h-12 sm:w-12 xl:bottom-8"
         aria-label="Back to top"
       >
-        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg className="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
         </svg>
       </button>
+
+      {/* Hide-scrollbar utility (applied via className "scrollbar-none") */}
+      <style>{`
+        .scrollbar-none {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+        .scrollbar-none::-webkit-scrollbar {
+          display: none;
+        }
+      `}</style>
     </div>
   );
 }
