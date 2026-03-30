@@ -3,10 +3,6 @@ import { useEffect, useState } from "react";
 import { api } from "../lib/api";
 import { ImageViewerModal } from "../components/common/ImageViewerModal";
 import { Toast } from "../components/admin/ui/Toast";
-import { StatCard } from "../components/admin/ui/StatCard";
-import { EmptyState } from "../components/admin/ui/EmptyState";
-import { Badge } from "../components/admin/ui/Badge";
-import { StatusBadge } from "../components/admin/ui/StatusBadge";
 import { ConfirmModal } from "../components/admin/ui/ConfirmModal";
 import { DashboardTab } from "../components/admin/tabs/DashboardTab";
 import { ModerationTab } from "../components/admin/tabs/ModerationTab";
@@ -506,13 +502,15 @@ export function AdminPage() {
   // MAIN ADMIN DASHBOARD
   // ============================================================================
 
+  const isSidebarExpanded = sidebarOpen || mobileSidebarOpen;
+
   return (
     <div className="flex min-h-screen bg-slate-100">
       {/* Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-30 flex w-64 flex-col border-r border-slate-200 bg-white transition-transform duration-300 lg:relative lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-30 flex w-64 flex-col border-r border-slate-200 bg-white transition-all duration-300 lg:relative lg:translate-x-0 ${
           mobileSidebarOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
+        } ${sidebarOpen ? "lg:w-64" : "lg:w-[88px]"}`}
       >
         {/* Sidebar Header */}
         <div className="flex h-16 items-center justify-between border-b border-slate-100 px-4">
@@ -520,17 +518,26 @@ export function AdminPage() {
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-slate-900 to-slate-700">
               <Shield className="h-5 w-5 text-white" />
             </div>
-            <div>
+            <div className={isSidebarExpanded ? "" : "lg:hidden"}>
               <h1 className="text-sm font-bold text-slate-900">Admin Panel</h1>
               <p className="text-[10px] text-slate-400">Paper Archive</p>
             </div>
           </div>
-          <button
-            onClick={() => setMobileSidebarOpen(false)}
-            className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 lg:hidden"
-          >
-            <X className="h-5 w-5" />
-          </button>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => setSidebarOpen((prev) => !prev)}
+              className="hidden rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 lg:inline-flex"
+              title={sidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
+            >
+              <ChevronRight className={`h-5 w-5 transition-transform ${sidebarOpen ? "rotate-180" : "rotate-0"}`} />
+            </button>
+            <button
+              onClick={() => setMobileSidebarOpen(false)}
+              className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 lg:hidden"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
         </div>
 
         {/* Navigation */}
@@ -546,23 +553,24 @@ export function AdminPage() {
                     setActiveTab(item.id);
                     setMobileSidebarOpen(false);
                   }}
-                  className={`flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-sm font-medium transition-all ${
+                  className={`flex w-full items-center rounded-xl px-3 py-2.5 text-sm font-medium transition-all ${
                     isActive
                       ? "bg-slate-900 text-white"
                       : "text-slate-600 hover:bg-slate-100"
                   }`}
+                  title={item.label}
                 >
-                  <div className="flex items-center gap-3">
+                  <div className={`flex items-center gap-3 ${isSidebarExpanded ? "" : "justify-center lg:w-full"}`}>
                     <Icon className="h-5 w-5" />
-                    {item.label}
+                    {isSidebarExpanded ? <span>{item.label}</span> : null}
                   </div>
-                  {item.badge && (
+                  {item.badge && isSidebarExpanded ? (
                     <span className={`flex h-5 min-w-[20px] items-center justify-center rounded-full px-1.5 text-xs font-bold ${
                       isActive ? "bg-white text-slate-900" : "bg-red-500 text-white"
                     }`}>
                       {item.badge}
                     </span>
-                  )}
+                  ) : null}
                 </button>
               );
             })}
@@ -571,14 +579,16 @@ export function AdminPage() {
 
         {/* Sidebar Footer - User Info */}
         <div className="border-t border-slate-100 p-3">
-          <div className="flex items-center gap-3 rounded-xl bg-slate-50 p-3">
+          <div className={`flex items-center rounded-xl bg-slate-50 p-3 ${isSidebarExpanded ? "gap-3" : "justify-center"}`}>
             <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-sm font-bold text-white">
               {me?.email?.[0]?.toUpperCase() || "A"}
             </div>
-            <div className="flex-1 truncate">
-              <p className="truncate text-sm font-semibold text-slate-900">Admin</p>
-              <p className="truncate text-xs text-slate-500">{me?.email}</p>
-            </div>
+            {isSidebarExpanded ? (
+              <div className="flex-1 truncate">
+                <p className="truncate text-sm font-semibold text-slate-900">Admin</p>
+                <p className="truncate text-xs text-slate-500">{me?.email}</p>
+              </div>
+            ) : null}
             <button
               onClick={onLogout}
               className="rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-200 hover:text-slate-600"
@@ -608,6 +618,13 @@ export function AdminPage() {
               className="rounded-lg p-2 text-slate-600 hover:bg-slate-100 lg:hidden"
             >
               <Menu className="h-5 w-5" />
+            </button>
+            <button
+              onClick={() => setSidebarOpen((prev) => !prev)}
+              className="hidden rounded-lg p-2 text-slate-600 hover:bg-slate-100 lg:inline-flex"
+              title={sidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
+            >
+              <ChevronRight className={`h-5 w-5 transition-transform ${sidebarOpen ? "rotate-180" : "rotate-0"}`} />
             </button>
             <h2 className="text-lg font-bold text-slate-900 capitalize">{activeTab}</h2>
           </div>

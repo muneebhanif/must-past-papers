@@ -95,12 +95,31 @@ export function DashboardTab({
         <div className="mt-4 space-y-2">
           {activity.slice(0, 5).map((item) => (
             <div key={item._id || item.id} className="flex items-center gap-3 rounded-lg px-2 py-2 hover:bg-slate-50">
-              <div className={`flex h-8 w-8 items-center justify-center rounded-full ${item.type === "comment" ? "bg-blue-100" : "bg-rose-100"}`}>
-                {item.type === "comment" ? <MessageSquare className="h-4 w-4 text-blue-600" /> : <Heart className="h-4 w-4 text-rose-600" />}
+              <div
+                className={`flex h-8 w-8 items-center justify-center rounded-full ${
+                  item.type === "comment"
+                    ? "bg-blue-100"
+                    : item.type === "paper_edit"
+                      ? "bg-amber-100"
+                      : "bg-rose-100"
+                }`}
+              >
+                {item.type === "comment" ? (
+                  <MessageSquare className="h-4 w-4 text-blue-600" />
+                ) : item.type === "paper_edit" ? (
+                  <FileText className="h-4 w-4 text-amber-600" />
+                ) : (
+                  <Heart className="h-4 w-4 text-rose-600" />
+                )}
               </div>
               <div className="min-w-0 flex-1">
                 <p className="text-sm text-slate-700">
-                  <span className="font-semibold">@{item.actorName}</span> {item.type === "comment" ? "commented on" : "liked"}{" "}
+                  <span className="font-semibold">@{item.actorName}</span>{" "}
+                  {item.type === "comment"
+                    ? "commented on"
+                    : item.type === "paper_edit"
+                      ? "edited"
+                      : "liked"}{" "}
                   <span className="font-semibold">{item.paperTitle}</span>
                 </p>
               </div>

@@ -47,6 +47,8 @@ export default defineSchema({
     reviewNote: v.optional(v.string()),
     reviewedAt: v.optional(v.number()),
     reviewedBy: v.optional(v.string()),
+    updatedAt: v.optional(v.number()),
+    updatedBy: v.optional(v.string()),
     likeCount: v.optional(v.number()),
     commentCount: v.optional(v.number()),
     createdAt: v.number(),
@@ -55,7 +57,8 @@ export default defineSchema({
     .index("by_status_type_createdAt", ["status", "type", "createdAt"])
     .index("by_department_status_createdAt", ["department", "status", "createdAt"])
     .index("by_department_status_type_createdAt", ["department", "status", "type", "createdAt"])
-    .index("by_uploadedBy_createdAt", ["uploadedBy", "createdAt"]),
+    .index("by_uploadedBy_createdAt", ["uploadedBy", "createdAt"])
+    .index("by_updatedAt", ["updatedAt"]),
 
   comments: defineTable({
     paperId: v.id("papers"),

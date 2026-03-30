@@ -236,11 +236,12 @@ export const listActivity = query({
     await requireValidSession(ctx, args.token);
 
     const limit = Math.min(Math.max(args.limit ?? 80, 20), 200);
-    const perTypeLimit = Math.ceil(limit / 2);
+    const perTypeLimit = Math.ceil(limit / 3);
 
-    const [recentComments, recentLikes] = await Promise.all([
+    const [recentComments, recentLikes, recentPaperEdits] = await Promise.all([
       ctx.db.query("comments").order("desc").take(perTypeLimit),
       ctx.db.query("likes").order("desc").take(perTypeLimit),
+      ctx.db.query("papers").withIndex("by_updatedAt").order("desc").take(perTypeLimit),
     ]);
 
     const commentEvents = await Promise.all(
@@ -279,7 +280,23 @@ export const listActivity = query({
       }),
     );
 
-    return [...commentEvents, ...likeEvents]
+    const paperEditEvents = await Promise.all(
+      recentPaperEdits
+        .filter((paper) => (paper.updatedAt ?? 0) > (paper.createdAt ?? 0))
+        .map(async (paper) => {
+          const uploader = await ctx.db.get(paper.uploadedBy);
+          return {
+            id: `paper_edit_${paper._id}_${paper.updatedAt}`,
+            type: "paper_edit",
+            createdAt: paper.updatedAt,
+            actorName: paper.updatedBy ?? uploader?.username ?? uploader?.name ?? "student",
+            paperTitle: paper.title ?? "Untitled paper",
+            content: "Updated paper details",
+          };
+        }),
+    );
+
+    return [...commentEvents, ...likeEvents, ...paperEditEvents]
       .sort((a, b) => b.createdAt - a.createdAt)
       .slice(0, limit);
   },
@@ -304,7 +321,7 @@ export const updatePaper = mutation({
     subject: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    await requireValidSession(ctx, args.token);
+    const session = await requireValidSession(ctx, args.token);
 
     const paper = await ctx.db.get(args.paperId);
     if (!paper) {
@@ -323,6 +340,8 @@ export const updatePaper = mutation({
       title,
       department,
       subject,
+      updatedAt: Date.now(),
+      updatedBy: session.email,
     });
 
     return { ok: true };

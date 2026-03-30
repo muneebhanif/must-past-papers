@@ -308,6 +308,8 @@ export const create = mutation({
       ...(secondImageFileId ? { secondImageFileId } : {}),
       uploadedBy: user._id,
       status: "pending",
+      updatedAt: now,
+      updatedBy: user.username ?? user.name ?? "student",
       likeCount: 0,
       commentCount: 0,
       createdAt: now,
@@ -361,6 +363,8 @@ export const updateMyPaper = mutation({
       reviewNote: undefined,
       reviewedAt: undefined,
       reviewedBy: undefined,
+      updatedAt: Date.now(),
+      updatedBy: user.username ?? user.name ?? "student",
     });
 
     return { ok: true };
