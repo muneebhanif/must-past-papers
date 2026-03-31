@@ -13,7 +13,14 @@ if (!convexUrl) {
   throw new Error("Missing VITE_CONVEX_URL. Configure it in your environment.");
 }
 
-const convex = new ConvexReactClient(convexUrl);
+const convex = new ConvexReactClient(convexUrl, {
+  onServerDisconnectError: (message) => {
+    if (typeof window === "undefined") return;
+    window.dispatchEvent(
+      new CustomEvent("convex-disconnect-error", { detail: message }),
+    );
+  },
+});
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

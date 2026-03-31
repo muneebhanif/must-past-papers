@@ -43,6 +43,8 @@ export function PaperCard({ paper, onRequireAuth, isFocused = false }) {
   const [editingCommentValue, setEditingCommentValue] = useState("");
   const [commentActionBusy, setCommentActionBusy] = useState(false);
   const [commentActionError, setCommentActionError] = useState("");
+  const [replyToId, setReplyToId] = useState("");
+  const [replyValue, setReplyValue] = useState("");
   const [isLikeAnimating, setIsLikeAnimating] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [secondImageLoaded, setSecondImageLoaded] = useState(false);
@@ -134,6 +136,26 @@ export function PaperCard({ paper, onRequireAuth, isFocused = false }) {
     }
   };
 
+  const onSubmitReply = async (e, parentId) => {
+    e.preventDefault();
+    if (!isAuthenticated) {
+      onRequireAuth();
+      return;
+    }
+    if (!replyValue.trim()) return;
+
+    try {
+      setCommentActionBusy(true);
+      await createComment({ paperId: paper._id, content: replyValue, parentId });
+      setReplyValue("");
+      setReplyToId("");
+    } catch (err) {
+      setCommentActionError(err?.message || "Could not post reply.");
+    } finally {
+      setCommentActionBusy(false);
+    }
+  };
+
   const onStartEditComment = (item) => {
     setCommentActionError("");
     setEditingCommentId(item._id);
@@ -176,6 +198,19 @@ export function PaperCard({ paper, onRequireAuth, isFocused = false }) {
       setCommentActionBusy(false);
     }
   };
+
+  const rootComments = comments.filter((item) => !item.parentId);
+  const repliesByParent = comments.reduce((acc, item) => {
+    if (!item.parentId) return acc;
+    const list = acc.get(item.parentId) ?? [];
+    list.push(item);
+    acc.set(item.parentId, list);
+    return acc;
+  }, new Map());
+  for (const list of repliesByParent.values()) {
+    list.sort((a, b) => a.createdAt - b.createdAt);
+  }
+  const visibleComments = showAllComments ? rootComments : rootComments.slice(0, 2);
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -584,98 +619,232 @@ export function PaperCard({ paper, onRequireAuth, isFocused = false }) {
         )}
 
         {/* Comments List */}
-        {comments.length > 0 && (
+        {rootComments.length > 0 && (
           <div className="mt-4 space-y-3">
-            {(showAllComments ? comments : comments.slice(0, 2)).map((item) => (
-              <div
-                key={item._id}
-                className="group/comment flex gap-3 transition-all duration-200"
-              >
-                <img
-                  src={cartoonAvatar(item.user.name || item.user._id)}
-                  alt={item.user.name}
-                  className="h-8 w-8 flex-shrink-0 rounded-full object-cover ring-2 ring-white shadow-sm"
-                  loading="lazy"
-                />
-                <div className="flex-1">
-                  {editingCommentId === item._id ? (
-                    <div className="space-y-2">
-                      <textarea
-                        value={editingCommentValue}
-                        onChange={(e) => setEditingCommentValue(e.target.value)}
-                        rows={2}
-                        autoFocus
-                        className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm transition-all duration-200 focus:border-blue-300 focus:outline-none focus:ring-4 focus:ring-blue-50"
-                      />
-                      <div className="flex gap-2">
-                        <button
-                          type="button"
-                          onClick={() => void onSaveEditedComment(item._id)}
-                          disabled={commentActionBusy}
-                          className="inline-flex items-center gap-1.5 rounded-lg bg-blue-500 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-blue-600 disabled:opacity-50"
-                        >
-                          <Check className="h-3.5 w-3.5" />
-                          Save
-                        </button>
+            {visibleComments.map((item) => {
+              const replies = repliesByParent.get(item._id) ?? [];
+              return (
+                <div key={item._id} className="space-y-2">
+                  <div className="group/comment flex gap-3 transition-all duration-200">
+                    <img
+                      src={cartoonAvatar(item.user.name || item.user._id)}
+                      alt={item.user.name}
+                      className="h-8 w-8 flex-shrink-0 rounded-full object-cover ring-2 ring-white shadow-sm"
+                      loading="lazy"
+                    />
+                    <div className="flex-1">
+                      {editingCommentId === item._id ? (
+                        <div className="space-y-2">
+                          <textarea
+                            value={editingCommentValue}
+                            onChange={(e) => setEditingCommentValue(e.target.value)}
+                            rows={2}
+                            autoFocus
+                            className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm transition-all duration-200 focus:border-blue-300 focus:outline-none focus:ring-4 focus:ring-blue-50"
+                          />
+                          <div className="flex gap-2">
+                            <button
+                              type="button"
+                              onClick={() => void onSaveEditedComment(item._id)}
+                              disabled={commentActionBusy}
+                              className="inline-flex items-center gap-1.5 rounded-lg bg-blue-500 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-blue-600 disabled:opacity-50"
+                            >
+                              <Check className="h-3.5 w-3.5" />
+                              Save
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setEditingCommentId("");
+                                setEditingCommentValue("");
+                              }}
+                              disabled={commentActionBusy}
+                              className="inline-flex items-center gap-1.5 rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-600 transition-colors hover:bg-slate-200 disabled:opacity-50"
+                            >
+                              <X className="h-3.5 w-3.5" />
+                              Cancel
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="rounded-2xl rounded-tl-sm bg-slate-100 px-4 py-2.5">
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-semibold text-slate-900">
+                              {item.user.name}
+                            </span>
+                            {item.editedAt && (
+                              <span className="text-[10px] font-medium text-slate-400">
+                                • edited
+                              </span>
+                            )}
+                          </div>
+                          <p className="mt-0.5 text-sm text-slate-600">{item.content}</p>
+                        </div>
+                      )}
+
+                      <div className="mt-1 flex items-center gap-3 pl-2 text-xs font-medium text-slate-500">
                         <button
                           type="button"
                           onClick={() => {
-                            setEditingCommentId("");
-                            setEditingCommentValue("");
+                            if (!isAuthenticated) {
+                              onRequireAuth();
+                              return;
+                            }
+                            setReplyToId(item._id);
                           }}
-                          disabled={commentActionBusy}
-                          className="inline-flex items-center gap-1.5 rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-600 transition-colors hover:bg-slate-200 disabled:opacity-50"
+                          className="transition-colors hover:text-blue-600"
                         >
-                          <X className="h-3.5 w-3.5" />
-                          Cancel
+                          Reply
                         </button>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="rounded-2xl rounded-tl-sm bg-slate-100 px-4 py-2.5">
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-semibold text-slate-900">
-                          {item.user.name}
-                        </span>
-                        {item.editedAt && (
-                          <span className="text-[10px] font-medium text-slate-400">
-                            • edited
-                          </span>
+                        {me?._id === item.user._id && editingCommentId !== item._id && (
+                          <>
+                            <button
+                              type="button"
+                              onClick={() => onStartEditComment(item)}
+                              disabled={commentActionBusy}
+                              className="flex items-center gap-1 transition-colors hover:text-blue-600 disabled:opacity-50"
+                            >
+                              <Edit3 className="h-3 w-3" />
+                              Edit
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => void onDeleteComment(item._id)}
+                              disabled={commentActionBusy}
+                              className="flex items-center gap-1 transition-colors hover:text-red-600 disabled:opacity-50"
+                            >
+                              <Trash2 className="h-3 w-3" />
+                              Delete
+                            </button>
+                          </>
                         )}
                       </div>
-                      <p className="mt-0.5 text-sm text-slate-600">{item.content}</p>
-                    </div>
-                  )}
 
-                  {/* Comment Actions */}
-                  {me?._id === item.user._id && editingCommentId !== item._id && (
-                    <div className="mt-1 flex items-center gap-3 pl-2 opacity-0 transition-opacity duration-200 group-hover/comment:opacity-100">
-                      <button
-                        type="button"
-                        onClick={() => onStartEditComment(item)}
-                        disabled={commentActionBusy}
-                        className="flex items-center gap-1 text-xs font-medium text-slate-500 transition-colors hover:text-blue-600 disabled:opacity-50"
-                      >
-                        <Edit3 className="h-3 w-3" />
-                        Edit
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => void onDeleteComment(item._id)}
-                        disabled={commentActionBusy}
-                        className="flex items-center gap-1 text-xs font-medium text-slate-500 transition-colors hover:text-red-600 disabled:opacity-50"
-                      >
-                        <Trash2 className="h-3 w-3" />
-                        Delete
-                      </button>
+                      {replyToId === item._id && (
+                        <form
+                          onSubmit={(e) => void onSubmitReply(e, item._id)}
+                          className="mt-2 flex gap-2"
+                        >
+                          <input
+                            value={replyValue}
+                            onChange={(e) => setReplyValue(e.target.value)}
+                            placeholder={`Reply to ${item.user.name}...`}
+                            className="flex-1 rounded-full border border-slate-200 bg-white px-3 py-2 text-xs text-slate-700 transition-all focus:border-blue-300 focus:outline-none focus:ring-4 focus:ring-blue-50"
+                          />
+                          <button
+                            type="submit"
+                            disabled={!replyValue.trim() || commentActionBusy}
+                            className="rounded-full bg-blue-500 px-3 text-xs font-semibold text-white transition-colors hover:bg-blue-600 disabled:opacity-50"
+                          >
+                            Send
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setReplyToId("");
+                              setReplyValue("");
+                            }}
+                            className="rounded-full bg-slate-100 px-3 text-xs font-semibold text-slate-600 transition-colors hover:bg-slate-200"
+                          >
+                            Cancel
+                          </button>
+                        </form>
+                      )}
+                    </div>
+                  </div>
+
+                  {replies.length > 0 && (
+                    <div className="space-y-2 pl-11">
+                      {replies.map((reply) => (
+                        <div key={reply._id} className="group/comment flex gap-3">
+                          <img
+                            src={cartoonAvatar(reply.user.name || reply.user._id)}
+                            alt={reply.user.name}
+                            className="h-7 w-7 flex-shrink-0 rounded-full object-cover ring-2 ring-white shadow-sm"
+                            loading="lazy"
+                          />
+                          <div className="flex-1">
+                            {editingCommentId === reply._id ? (
+                              <div className="space-y-2">
+                                <textarea
+                                  value={editingCommentValue}
+                                  onChange={(e) => setEditingCommentValue(e.target.value)}
+                                  rows={2}
+                                  autoFocus
+                                  className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm transition-all duration-200 focus:border-blue-300 focus:outline-none focus:ring-4 focus:ring-blue-50"
+                                />
+                                <div className="flex gap-2">
+                                  <button
+                                    type="button"
+                                    onClick={() => void onSaveEditedComment(reply._id)}
+                                    disabled={commentActionBusy}
+                                    className="inline-flex items-center gap-1.5 rounded-lg bg-blue-500 px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-blue-600 disabled:opacity-50"
+                                  >
+                                    <Check className="h-3.5 w-3.5" />
+                                    Save
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setEditingCommentId("");
+                                      setEditingCommentValue("");
+                                    }}
+                                    disabled={commentActionBusy}
+                                    className="inline-flex items-center gap-1.5 rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-600 transition-colors hover:bg-slate-200 disabled:opacity-50"
+                                  >
+                                    <X className="h-3.5 w-3.5" />
+                                    Cancel
+                                  </button>
+                                </div>
+                              </div>
+                            ) : (
+                              <div className="rounded-2xl rounded-tl-sm bg-slate-100 px-4 py-2.5">
+                                <div className="flex items-center gap-2">
+                                  <span className="text-sm font-semibold text-slate-900">
+                                    {reply.user.name}
+                                  </span>
+                                  {reply.editedAt && (
+                                    <span className="text-[10px] font-medium text-slate-400">
+                                      • edited
+                                    </span>
+                                  )}
+                                </div>
+                                <p className="mt-0.5 text-sm text-slate-600">{reply.content}</p>
+                              </div>
+                            )}
+
+                            {me?._id === reply.user._id && editingCommentId !== reply._id && (
+                              <div className="mt-1 flex items-center gap-3 pl-2 text-xs font-medium text-slate-500 opacity-0 transition-opacity duration-200 group-hover/comment:opacity-100">
+                                <button
+                                  type="button"
+                                  onClick={() => onStartEditComment(reply)}
+                                  disabled={commentActionBusy}
+                                  className="flex items-center gap-1 transition-colors hover:text-blue-600 disabled:opacity-50"
+                                >
+                                  <Edit3 className="h-3 w-3" />
+                                  Edit
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => void onDeleteComment(reply._id)}
+                                  disabled={commentActionBusy}
+                                  className="flex items-center gap-1 transition-colors hover:text-red-600 disabled:opacity-50"
+                                >
+                                  <Trash2 className="h-3 w-3" />
+                                  Delete
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   )}
                 </div>
-              </div>
-            ))}
+              );
+            })}
 
-            {/* Show More Comments */}
-            {comments.length > 2 && (
+            {rootComments.length > 2 && (
               <button
                 type="button"
                 onClick={() => setShowAllComments((v) => !v)}
@@ -683,7 +852,7 @@ export function PaperCard({ paper, onRequireAuth, isFocused = false }) {
               >
                 {showAllComments
                   ? "Show fewer comments"
-                  : `View all ${comments.length} comments`}
+                  : `View all ${rootComments.length} comments`}
               </button>
             )}
           </div>

@@ -66,8 +66,10 @@ export default defineSchema({
     content: v.string(),
     createdAt: v.number(),
     editedAt: v.optional(v.number()),
+    parentId: v.optional(v.id("comments")),
   })
     .index("by_paperId_createdAt", ["paperId", "createdAt"])
+    .index("by_paperId_parentId_createdAt", ["paperId", "parentId", "createdAt"])
     .index("by_userId_createdAt", ["userId", "createdAt"]),
 
   likes: defineTable({

@@ -37,6 +37,7 @@ export const create = mutation({
   args: {
     paperId: v.id("papers"),
     content: v.string(),
+    parentId: v.optional(v.id("comments")),
   },
   handler: async (ctx, args) => {
     const user = await requireUser(ctx);
@@ -44,6 +45,13 @@ export const create = mutation({
     const paper = await ctx.db.get(args.paperId);
     if (!paper) {
       throw new ConvexError("Paper not found.");
+    }
+
+    if (args.parentId) {
+      const parent = await ctx.db.get(args.parentId);
+      if (!parent || parent.paperId !== args.paperId) {
+        throw new ConvexError("Parent comment not found.");
+      }
     }
 
     const cleanContent = args.content.trim();
@@ -93,6 +101,7 @@ export const create = mutation({
       userId: user._id,
       content: cleanContent,
       createdAt: now,
+      ...(args.parentId ? { parentId: args.parentId } : {}),
     });
 
     await ctx.db.patch(args.paperId, {
@@ -164,6 +173,16 @@ export const remove = mutation({
 
     if (comment.userId !== user._id) {
       throw new ConvexError("You can only delete your own comments.");
+    }
+
+    const replies = await ctx.db
+      .query("comments")
+      .withIndex("by_paperId_parentId_createdAt", (q) =>
+        q.eq("paperId", comment.paperId).eq("parentId", comment._id),
+      )
+      .collect();
+    for (const reply of replies) {
+      await ctx.db.patch(reply._id, { parentId: undefined });
     }
 
     const paper = await ctx.db.get(comment.paperId);
