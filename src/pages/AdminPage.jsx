@@ -11,6 +11,8 @@ import { UsersTab } from "../components/admin/tabs/UsersTab";
 import { ActivityTab } from "../components/admin/tabs/ActivityTab";
 import { AnalyticsTab } from "../components/admin/tabs/AnalyticsTab";
 import { SettingsTab } from "../components/admin/tabs/SettingsTab";
+import { CommentsTab } from "../components/admin/tabs/CommentsTab";
+import { LikesTab } from "../components/admin/tabs/LikesTab";
 import {
   Shield,
   LogOut,
@@ -58,7 +60,8 @@ import {
   ExternalLink,
   Copy,
   LayoutDashboard,
-  GraduationCap
+  GraduationCap,
+  CornerDownRight,
 } from "lucide-react";
 
 // ============================================================================
@@ -389,11 +392,13 @@ export function AdminPage() {
     return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
   };
 
-  // Navigation items
+  // Navigation items - expanded with new tabs
   const navItems = [
     { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
     { id: "moderation", label: "Moderation", icon: FileCheck, badge: pending.length || null },
     { id: "papers", label: "All Papers", icon: FileText },
+    { id: "comments", label: "Comments", icon: MessageSquare },
+    { id: "likes", label: "Likes", icon: Heart },
     { id: "users", label: "Users", icon: Users },
     { id: "activity", label: "Activity", icon: Activity },
     { id: "analytics", label: "Analytics", icon: BarChart3 },
@@ -674,6 +679,7 @@ export function AdminPage() {
               setActiveTab={setActiveTab}
               setActivePaper={setActivePaper}
               formatDate={formatDate}
+              token={token}
             />
           ) : null}
 
@@ -711,6 +717,26 @@ export function AdminPage() {
             />
           ) : null}
 
+          {activeTab === "comments" ? (
+            <CommentsTab
+              token={token}
+              addToast={addToast}
+              setConfirmModal={setConfirmModal}
+              actionLoading={actionLoading}
+              setActionLoading={setActionLoading}
+            />
+          ) : null}
+
+          {activeTab === "likes" ? (
+            <LikesTab
+              token={token}
+              addToast={addToast}
+              setConfirmModal={setConfirmModal}
+              actionLoading={actionLoading}
+              setActionLoading={setActionLoading}
+            />
+          ) : null}
+
           {activeTab === "users" ? (
             <UsersTab
               editingUserId={editingUserId}
@@ -738,7 +764,7 @@ export function AdminPage() {
           ) : null}
 
           {activeTab === "analytics" ? (
-            <AnalyticsTab allPapers={allPapers} users={users} activity={activity} />
+            <AnalyticsTab allPapers={allPapers} users={users} activity={activity} token={token} />
           ) : null}
 
           {activeTab === "settings" ? (
