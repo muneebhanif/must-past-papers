@@ -253,73 +253,101 @@ export function UploadPage({ onRequireAuth }) {
 
         <form onSubmit={onSubmit} className="mt-6 space-y-4">
           <div className="grid gap-4 md:grid-cols-2">
+            <div className="space-y-2">
+              <label htmlFor="upload-department" className="text-xs font-semibold uppercase tracking-wider text-slate-500">Department</label>
+              <select
+                id="upload-department"
+                value={form.department}
+                onChange={(e) => setForm((p) => ({ ...p, department: e.target.value }))}
+                className="w-full rounded-xl border-none bg-slate-100 px-3 py-3 text-sm"
+              >
+                {DEPARTMENTS.filter((d) => d !== "All").map((department) => (
+                  <option key={department}>{department}</option>
+                ))}
+              </select>
+            </div>
+            <div className="space-y-2">
+              <label htmlFor="upload-type" className="text-xs font-semibold uppercase tracking-wider text-slate-500">Paper type</label>
+              <select
+                id="upload-type"
+                value={form.type}
+                onChange={(e) => setForm((p) => ({ ...p, type: e.target.value }))}
+                className="w-full rounded-xl border-none bg-slate-100 px-3 py-3 text-sm"
+                required
+              >
+                {PAPER_TYPES.map((paperType) => (
+                  <option key={paperType} value={paperType}>{paperType}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <label htmlFor="upload-semester" className="text-xs font-semibold uppercase tracking-wider text-slate-500">Semester</label>
             <select
-              value={form.department}
-              onChange={(e) => setForm((p) => ({ ...p, department: e.target.value }))}
-              className="rounded-xl border-none bg-slate-100 px-3 py-3 text-sm"
-            >
-              {DEPARTMENTS.filter((d) => d !== "All").map((department) => (
-                <option key={department}>{department}</option>
-              ))}
-            </select>
-            <select
-              value={form.type}
-              onChange={(e) => setForm((p) => ({ ...p, type: e.target.value }))}
-              className="rounded-xl border-none bg-slate-100 px-3 py-3 text-sm"
+              id="upload-semester"
+              value={form.semester}
+              onChange={(e) => setForm((p) => ({ ...p, semester: e.target.value }))}
+              className="w-full rounded-xl border-none bg-slate-100 px-3 py-3 text-sm"
               required
             >
-              {PAPER_TYPES.map((paperType) => (
-                <option key={paperType} value={paperType}>{paperType}</option>
+              {SEMESTERS.map((semesterOption) => (
+                <option key={semesterOption} value={semesterOption}>{`Semester ${semesterOption}`}</option>
               ))}
             </select>
           </div>
 
-          <select
-            value={form.semester}
-            onChange={(e) => setForm((p) => ({ ...p, semester: e.target.value }))}
-            className="w-full rounded-xl border-none bg-slate-100 px-3 py-3 text-sm"
-            required
-          >
-            {SEMESTERS.map((semesterOption) => (
-              <option key={semesterOption} value={semesterOption}>{`Semester ${semesterOption}`}</option>
-            ))}
-          </select>
-
-          <input
-            value={form.title}
-            onChange={(e) => setForm((p) => ({ ...p, title: e.target.value }))}
-            placeholder="Paper title"
-            className="w-full rounded-xl border-none bg-slate-100 px-3 py-3 text-sm"
-            required
-          />
+          <div className="space-y-2">
+            <label htmlFor="upload-title" className="text-xs font-semibold uppercase tracking-wider text-slate-500">Paper title</label>
+            <input
+              id="upload-title"
+              value={form.title}
+              onChange={(e) => setForm((p) => ({ ...p, title: e.target.value }))}
+              placeholder="Enter full paper title"
+              className="w-full rounded-xl border-none bg-slate-100 px-3 py-3 text-sm"
+              required
+            />
+          </div>
 
           <div className="grid gap-4 md:grid-cols-2">
-            <input
-              value={form.subject}
-              onChange={(e) => setForm((p) => ({ ...p, subject: e.target.value }))}
-              placeholder="Subject"
-              className="rounded-xl border-none bg-slate-100 px-3 py-3 text-sm"
-              required
-            />
-            <input
-              value={form.teacher}
-              onChange={(e) => setForm((p) => ({ ...p, teacher: e.target.value }))}
-              placeholder="Teacher"
-              className="rounded-xl border-none bg-slate-100 px-3 py-3 text-sm"
-              required
-            />
+            <div className="space-y-2">
+              <label htmlFor="upload-subject" className="text-xs font-semibold uppercase tracking-wider text-slate-500">Subject</label>
+              <input
+                id="upload-subject"
+                value={form.subject}
+                onChange={(e) => setForm((p) => ({ ...p, subject: e.target.value }))}
+                placeholder="e.g. Data Structures"
+                className="w-full rounded-xl border-none bg-slate-100 px-3 py-3 text-sm"
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <label htmlFor="upload-teacher" className="text-xs font-semibold uppercase tracking-wider text-slate-500">Teacher</label>
+              <input
+                id="upload-teacher"
+                value={form.teacher}
+                onChange={(e) => setForm((p) => ({ ...p, teacher: e.target.value }))}
+                placeholder="e.g. Sir Ahmed"
+                className="w-full rounded-xl border-none bg-slate-100 px-3 py-3 text-sm"
+                required
+              />
+            </div>
           </div>
 
-          <select
-            value={form.year}
-            onChange={(e) => setForm((p) => ({ ...p, year: e.target.value }))}
-            className="w-full rounded-xl border-none bg-slate-100 px-3 py-3 text-sm"
-            required
-          >
-            {ACADEMIC_YEARS.map((yearOption) => (
-              <option key={yearOption} value={yearOption}>{yearOption}</option>
-            ))}
-          </select>
+          <div className="space-y-2">
+            <label htmlFor="upload-year" className="text-xs font-semibold uppercase tracking-wider text-slate-500">Academic year / session</label>
+            <select
+              id="upload-year"
+              value={form.year}
+              onChange={(e) => setForm((p) => ({ ...p, year: e.target.value }))}
+              className="w-full rounded-xl border-none bg-slate-100 px-3 py-3 text-sm"
+              required
+            >
+              {ACADEMIC_YEARS.map((yearOption) => (
+                <option key={yearOption} value={yearOption}>{yearOption}</option>
+              ))}
+            </select>
+          </div>
 
           <div className="grid gap-3 md:grid-cols-2">
             <div className="space-y-2">
