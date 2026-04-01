@@ -63,7 +63,7 @@ export function Navbar({ search, setSearch }) {
 
   const openNotificationPost = (paperId) => {
     setNotificationsOpen(false);
-    navigate(`/?paper=${paperId}`);
+    navigate(`/paper/${paperId}`);
   };
 
   return (

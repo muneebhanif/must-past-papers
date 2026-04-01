@@ -10,6 +10,7 @@ import { FeedPage } from "./pages/FeedPage";
 import { UploadPage } from "./pages/UploadPage";
 import { ProfilePage } from "./pages/ProfilePage";
 import { AdminPage } from "./pages/AdminPage";
+import { PaperDetailPage } from "./pages/PaperDetailPage";
 import { DEPARTMENTS } from "./constants/departments";
 import { api } from "./lib/api";
 import { ADMIN_PANEL_PATH } from "./lib/adminPath";
@@ -28,6 +29,7 @@ export default function App() {
   const normalizedPath = (location.pathname || "/").replace(/\/+$/, "") || "/";
   const isAdminRoute = normalizedPath === `/${ADMIN_PANEL_PATH}`;
   const isProfileRoute = normalizedPath === "/profile";
+  const isPaperRoute = normalizedPath.startsWith("/paper/");
 
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -91,6 +93,9 @@ export default function App() {
     if (normalizedPath === "/upload") {
       title = "Upload Paper | MUST Past Papers";
       description = "Upload your MUST past papers and help students prepare better across all departments.";
+    } else if (isPaperRoute) {
+      title = "Paper Post | MUST Past Papers";
+      description = "View paper details, comments, replies, and interactions for this post.";
     } else if (normalizedPath === "/profile") {
       title = "Profile | MUST Past Papers";
       description = "Manage your uploads, profile details, and activity on MUST Past Papers.";
@@ -126,7 +131,7 @@ export default function App() {
     } else {
       setJsonLd(null);
     }
-  }, [isAdminRoute, location.pathname, location.search, normalizedPath]);
+  }, [isAdminRoute, isPaperRoute, location.pathname, location.search, normalizedPath]);
 
   return (
     <div className="app-shell min-h-screen text-slate-900">
@@ -180,6 +185,10 @@ export default function App() {
             <Route
               path="/upload"
               element={<UploadPage onRequireAuth={() => setAuthPromptOpen(true)} />}
+            />
+            <Route
+              path="/paper/:paperId"
+              element={<PaperDetailPage onRequireAuth={() => setAuthPromptOpen(true)} />}
             />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path={ADMIN_PANEL_PATH} element={<AdminPage />} />

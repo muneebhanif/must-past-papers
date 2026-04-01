@@ -380,6 +380,8 @@ export function PaperCard({ paper, onRequireAuth, isFocused = false }) {
               {paper.subject}
             </span>
             <span className="text-slate-300">•</span>
+            <span>{paper.department}</span>
+            <span className="text-slate-300">•</span>
             <span>{paper.teacher}</span>
             <span className="text-slate-300">•</span>
             <span>{paper.type}</span>

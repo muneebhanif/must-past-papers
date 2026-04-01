@@ -332,6 +332,27 @@ export const listMyUploads = query({
   },
 });
 
+export const getById = query({
+  args: {
+    paperId: v.id("papers"),
+  },
+  handler: async (ctx, args) => {
+    const viewerUserId = await getAuthUserId(ctx);
+    const paper = await ctx.db.get(args.paperId);
+
+    if (!paper) {
+      return null;
+    }
+
+    const canView = paper.status === "approved" || (viewerUserId && paper.uploadedBy === viewerUserId);
+    if (!canView) {
+      return null;
+    }
+
+    return enrichPaper(ctx, paper, viewerUserId ?? null);
+  },
+});
+
 export const updateMyPaper = mutation({
   args: {
     paperId: v.id("papers"),

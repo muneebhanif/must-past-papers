@@ -47,11 +47,14 @@ export const create = mutation({
       throw new ConvexError("Paper not found.");
     }
 
+    let parentComment = null;
+
     if (args.parentId) {
       const parent = await ctx.db.get(args.parentId);
       if (!parent || parent.paperId !== args.paperId) {
         throw new ConvexError("Parent comment not found.");
       }
+      parentComment = parent;
     }
 
     const cleanContent = args.content.trim();
@@ -115,6 +118,22 @@ export const create = mutation({
         paperId: paper._id,
         type: "comment",
         content: cleanContent.slice(0, 140),
+        read: false,
+        createdAt: now,
+      });
+    }
+
+    if (
+      parentComment &&
+      parentComment.userId !== user._id &&
+      parentComment.userId !== paper.uploadedBy
+    ) {
+      await ctx.db.insert("notifications", {
+        userId: parentComment.userId,
+        actorId: user._id,
+        paperId: paper._id,
+        type: "comment",
+        content: `Reply: ${cleanContent.slice(0, 140)}`,
         read: false,
         createdAt: now,
       });
