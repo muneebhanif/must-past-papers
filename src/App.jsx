@@ -197,7 +197,7 @@ export default function App() {
 
   return (
     <div className="app-shell min-h-screen text-slate-900">
-      {!isAdminRoute ? <Navbar search={search} setSearch={setSearch} /> : null}
+      {!isAdminRoute ? <Navbar /> : null}
 
       {!connectionState.isWebSocketConnected ? (
         <div className="mx-auto w-full max-w-[1300px] px-3 pt-3 md:px-4">

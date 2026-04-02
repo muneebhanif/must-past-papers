@@ -6,7 +6,7 @@ import { AuthButton } from "../auth/AuthButton";
 import mustLogo from "../../assets/must-logo.png";
 import { api } from "../../lib/api";
 
-export function Navbar({ search, setSearch }) {
+export function Navbar() {
   const location = useLocation();
   const navigate = useNavigate();
   const { isAuthenticated } = useConvexAuth();
@@ -86,15 +86,6 @@ export function Navbar({ search, setSearch }) {
                 <span className="sm:hidden">MUST PAPERS</span>
               </span>
             </Link>
-
-            <div className={`hidden lg:flex items-center rounded-xl px-3 py-2 ${isDark ? "bg-slate-800" : "bg-slate-100"}`}>
-              <input
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search papers, subjects, years..."
-                className={`w-80 border-none bg-transparent p-0 text-sm focus:ring-0 ${isDark ? "text-slate-100 placeholder:text-slate-400" : "text-slate-700 placeholder:text-slate-400"}`}
-              />
-            </div>
           </div>
 
           <div className="hidden xl:flex items-center gap-2 shrink-0">
@@ -247,16 +238,6 @@ export function Navbar({ search, setSearch }) {
           </div>
         ) : null}
 
-        <div className={`mt-2 lg:hidden rounded-xl px-3 py-2 ${isDark ? "bg-slate-800" : "bg-slate-100"}`}>
-          <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search papers, subjects, years..."
-            className={`w-full border-none bg-transparent p-0 text-sm focus:ring-0 ${
-              isDark ? "text-slate-100 placeholder:text-slate-400" : "text-slate-700 placeholder:text-slate-400"
-            }`}
-          />
-        </div>
       </div>
     </nav>
   );
